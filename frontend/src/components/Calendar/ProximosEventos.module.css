@@ -1,0 +1,188 @@
+/* ProximosEventos.module.css - Tema oscuro estilo VS Code con colores por tipo */
+
+.proximosEventos {
+  background: #252526;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid #3c3c3c;
+}
+
+.title {
+  font-size: 1.1rem;
+  margin: 0 0 16px 0;
+  color: #9cdcfe;
+  font-weight: 600;
+}
+
+.diasGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.diaCard {
+  background: #2d2d2d;
+  border-radius: 6px;
+  padding: 12px;
+  min-width: 100px;
+  border: 1px solid #3c3c3c;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.diaCard:hover {
+  border-color: #0e639c;
+  transform: translateY(-2px);
+  background: #333333;
+}
+
+.diaHeader {
+  text-align: center;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.diaNombre {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9cdcfe;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.diaNumero {
+  font-size: 20px;
+  font-weight: 700;
+  color: #d4d4d4;
+}
+
+.eventosList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 80px;
+}
+
+/* Estilo base para todos los eventos */
+.evento {
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: #d4d4d4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Segoe UI', 'SF Mono', monospace;
+  border: 1px solid #3c3c3c;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.evento:hover {
+  transform: translateX(2px);
+  filter: brightness(1.05);
+}
+
+/* Tareas - Azul VS Code */
+.eventoTarea {
+  background: #1e3a5f;
+  border-left: 3px solid #0e639c;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Exámenes - Naranja */
+.eventoExamen {
+  background: #3d2a1a;
+  border-left: 3px solid #ce9178;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Horarios - Verde */
+.eventoHorario {
+  background: #1e3a2a;
+  border-left: 3px solid #6a9955;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+.sinEventos {
+  font-size: 10px;
+  color: #858585;
+  text-align: center;
+  padding: 12px 0;
+  font-style: italic;
+}
+
+.eventoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.editarExamenBtn {
+  background: #3c3c3c;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: all 0.2s;
+  color: #d4d4d4;
+}
+
+.editarExamenBtn:hover {
+  opacity: 1;
+  background: #0e639c;
+  transform: scale(1.05);
+}
+
+/* Scrollbar estilo VS Code */
+.diasGrid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.diasGrid::-webkit-scrollbar-track {
+  background: #1e1e1e;
+  border-radius: 3px;
+}
+
+.diasGrid::-webkit-scrollbar-thumb {
+  background: #3c3c3c;
+  border-radius: 3px;
+}
+
+.diasGrid::-webkit-scrollbar-thumb:hover {
+  background: #0e639c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .diasGrid {
+    grid-template-columns: repeat(7, minmax(90px, 1fr));
+    gap: 8px;
+  }
+  
+  .diaCard {
+    padding: 8px;
+    min-width: 80px;
+  }
+  
+  .diaNumero {
+    font-size: 16px;
+  }
+  
+  .evento, .eventoTarea, .eventoExamen, .eventoHorario {
+    font-size: 9px;
+  }
+}

@@ -1,0 +1,232 @@
+/* DiaDetalleModal.module.css - Optimizado */
+
+.modalContent {
+  background: #252526;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 550px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid #3c3c3c;
+}
+
+@media (max-width: 640px) {
+  .modalContent {
+    padding: 16px;
+    width: 95%;
+    max-height: 85vh;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.modalHeader h3 {
+  color: #a78bfa; /* Violeta en lugar de celeste */
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 640px) {
+  .modalHeader h3 {
+    font-size: 1rem;
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #858585;
+  transition: color 0.2s;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.closeBtn:hover {
+  color: #f472b6; /* Rosa al hacer hover */
+}
+
+.eventosContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .eventosContainer {
+    gap: 8px;
+    max-height: 350px;
+  }
+}
+
+.eventoCard {
+  background: #2d2d2d;
+  border-radius: 6px;
+  padding: 10px;
+  border-left: 3px solid;
+}
+
+.eventoCard.tarea {
+  border-left-color: #7c3aed; /* Violeta */
+}
+
+.eventoCard.examen {
+  border-left-color: #ec489a; /* Rosa */
+}
+
+.eventoCard.horario {
+  border-left-color: #10b981; /* Verde esmeralda */
+}
+
+.eventoHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.eventoIcon {
+  font-size: 13px;
+}
+
+.eventoTitulo {
+  font-weight: 600;
+  color: #d4d4d4;
+  font-size: 12px;
+}
+
+.eventoMateria {
+  font-size: 9px;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.eventoHora, .eventoAula, .eventoNota {
+  font-size: 10px;
+  color: #858585;
+  margin-top: 3px;
+}
+
+.eventoActions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+
+/* Botones de acción compactos */
+.actionBtn {
+  background: #374151;
+  border: none;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: #e5e7eb;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+}
+
+.actionBtn svg {
+  width: 10px;
+  height: 10px;
+}
+
+.actionBtn:hover {
+  background: #7c3aed;
+  transform: scale(1.05);
+}
+
+/* Botones de agregar compactos */
+.agregarSection {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #3c3c3c;
+}
+
+.agregarSection button {
+  padding: 4px 10px;
+  font-size: 11px;
+  gap: 4px;
+}
+
+.agregarSection button svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 640px) {
+  .agregarSection {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .agregarSection button {
+    width: 100%;
+    justify-content: center;
+    padding: 6px 10px;
+  }
+}
+
+.formulario {
+  margin-top: 10px;
+  padding: 10px;
+  background: #2d2d2d;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formulario input, .formulario select {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.formButtons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.formButtons button {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+@media (max-width: 480px) {
+  .formButtons {
+    flex-direction: column;
+  }
+  
+  .formButtons button {
+    width: 100%;
+  }
+}
+
+.sinEventos {
+  text-align: center;
+  color: #858585;
+  padding: 30px;
+  font-style: italic;
+  font-size: 12px;
+}

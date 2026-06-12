@@ -1,0 +1,124 @@
+.horariosManager {
+  margin-top: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.horariosLista {
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.horarioItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.horarioItem:last-child {
+  border-bottom: none;
+}
+
+.horarioInfo {
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.eliminarBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ef4444;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.eliminarBtn:hover {
+  background: #fee2e2;
+}
+
+.agregarBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed #9ca3af;
+  color: #6b7280;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 100%;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.agregarBtn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+}
+
+.horarioForm {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.select, .input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.formButtons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.guardarBtn, .cancelarBtn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.guardarBtn {
+  background: #10b981;
+  color: white;
+}
+
+.guardarBtn:hover {
+  background: #059669;
+}
+
+.cancelarBtn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.cancelarBtn:hover {
+  background: #d1d5db;
+}

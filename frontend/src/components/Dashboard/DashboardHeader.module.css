@@ -1,0 +1,111 @@
+/* DashboardHeader.module.css - Tema oscuro responsive */
+
+.header {
+  background: #252526;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  border: 1px solid #3c3c3c;
+  overflow-x: hidden;
+}
+
+.headerTop {
+  margin-bottom: 20px;
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #d4d4d4;
+  word-break: break-word;
+}
+
+.header p {
+  margin: 0;
+  color: #9cdcfe;
+  font-size: 14px;
+}
+
+.userSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  border-top: 1px solid #3c3c3c;
+  padding-top: 16px;
+}
+
+.userInfo {
+  background: #3c3c3c;
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.userEmail {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ce9178;
+  word-break: break-all;
+}
+
+.userSection button {
+  align-self: flex-start;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 16px;
+  }
+  
+  .header h1 {
+    font-size: 22px;
+  }
+  
+  .header p {
+    font-size: 12px;
+  }
+  
+  .userEmail {
+    font-size: 12px;
+  }
+  
+  .userInfo {
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px;
+  }
+  
+  .header h1 {
+    font-size: 18px;
+  }
+  
+  .userInfo {
+    padding: 5px 10px;
+  }
+  
+  .userEmail {
+    font-size: 11px;
+  }
+  
+  .userSection {
+    gap: 8px;
+    padding-top: 12px;
+  }
+  
+  .userSection button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
