@@ -17,7 +17,7 @@ const getUsuarioId = (req) => {
 router.get('/', async (req, res) => {
   try {
     const usuarioId = getUsuarioId(req);
-    const examenes = await Examen.find({ usuarioId }).populate('materiaId', 'nombre color'); // ← Agregar 'color'
+    const examenes = await Examen.find({ usuarioId }).populate('materiaId', 'nombre color'); 
     res.json(examenes);
   } catch (error) {
     console.log('❌ Error GET:', error.message);
@@ -48,14 +48,7 @@ router.post("/", async (req, res) => {
     const examen = new Examen({ ...datos, usuarioId });
     await examen.save();
 
-    /* console.log("✅ Guardado exitoso");
-    console.log("📊 Colección:", examen.collection.name);
-    console.log("💾 Base de datos:", examen.db.name);
-    console.log("📄 ID del documento:", examen._id);
-    console.log(
-      "🔍 Total de documentos en colección:",
-      await Examen.countDocuments(),
-    ); */
+   
 
     // Verificar si realmente existe en BD
     const encontrado = await Examen.findById(examen._id);

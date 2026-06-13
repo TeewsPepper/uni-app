@@ -57,7 +57,7 @@ export const ExamenModal = ({ visible, fecha, materias, examen, onClose, onGuard
       await onGuardar({
         titulo,
         materiaId,
-        fecha,
+        fecha: fecha,
         hora,
         aula,
         contenido,

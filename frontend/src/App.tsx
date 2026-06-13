@@ -7,11 +7,12 @@ import { AuthForm } from "./components/Auth/AuthForm";
 import { DashboardHeader } from "./components/Dashboard/DashboardHeader";
 import { MateriaEditModal } from "./components/Materias/MateriaEditModal";
 import { MateriaForm } from "./components/Materias/MateriaForm";
-import { MateriaCard } from "./components/Materias/MateriaCard";
+import { MateriaCardWrapper as MateriaCard } from "./components/Materias/MateriaCardWrapper";
 import { Calendario } from "./components/Calendar/Calendario";
 import { ProximosEventos } from "./components/Calendar/ProximosEventos";
 import { DiaDetalleModal } from "./components/Calendar/DiaDetalleModal";
-import type { Materia, Horario } from "./types";
+import { ExamenModal } from "./components/Examenes/ExamenModal";
+import type { Materia, Horario, Examen } from "./types";
 import styles from "./App.module.css";
 
 function App() {
@@ -22,6 +23,11 @@ function App() {
   const [materiaEditando, setMateriaEditando] = useState<Materia | null>(null);
   const [mostrarModalDia, setMostrarModalDia] = useState(false);
   const [fechaSeleccionada, setFechaSeleccionada] = useState("");
+  
+  // Estados para el modal de examen
+  const [examenEditando, setExamenEditando] = useState<Examen | null>(null);
+  const [mostrarExamenModal, setMostrarExamenModal] = useState(false);
+  const [fechaExamenModal, setFechaExamenModal] = useState("");
 
   const {
     materias,
@@ -36,7 +42,7 @@ function App() {
     useTareas();
   const {
     examenes,
-    cargando,
+    cargando: examenesCargando,
     agregarExamen,
     actualizarExamen,
     eliminarExamen,
@@ -130,10 +136,53 @@ function App() {
     }
   };
 
-  const handleEditarExamen = (examen: any) => {
-    const fechaStr = new Date(examen.fecha).toISOString().split("T")[0];
-    setFechaSeleccionada(fechaStr);
-    setMostrarModalDia(true);
+  // ✅ FUNCIÓN CORREGIDA: Mantiene la fecha original del examen
+  const handleEditarExamen = (examen: Examen) => {
+    setExamenEditando(examen);
+    // Extraer la fecha correctamente sin ajuste de zona horaria
+    const fechaObj = new Date(examen.fecha);
+    const year = fechaObj.getFullYear();
+    const month = String(fechaObj.getMonth() + 1).padStart(2, '0');
+    const day = String(fechaObj.getDate()).padStart(2, '0');
+    const fechaStr = `${year}-${month}-${day}`;
+    setFechaExamenModal(fechaStr);
+    setMostrarExamenModal(true);
+  };
+
+  // ✅ FUNCIÓN CORREGIDA: Al guardar, mantener la fecha original en edición
+  const handleGuardarExamen = async (datos: {
+    titulo: string;
+    materiaId: string;
+    fecha: string;
+    hora: string;
+    aula: string;
+    contenido: string;
+    nota: number | null;
+  }) => {
+    try {
+      if (examenEditando) {
+        // Modo edición: mantener la fecha original del examen
+        const examenData = {
+          ...datos,
+          fecha: examenEditando.fecha // Usar la fecha original
+        };
+        await actualizarExamen(examenEditando._id, examenData);
+      } else {
+        // Modo creación: crear nueva fecha
+        const [year, month, day] = datos.fecha.split("-");
+        const fechaUTC = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+        await agregarExamen({
+          ...datos,
+          fecha: fechaUTC.toISOString()
+        });
+      }
+      await recargar();
+      setMostrarExamenModal(false);
+      setExamenEditando(null);
+      setError(null);
+    } catch {
+      setError("No se pudo guardar el examen");
+    }
   };
 
   const handleFechaClick = (fecha: string) => {
@@ -141,7 +190,6 @@ function App() {
     setMostrarModalDia(true);
   };
 
-  // ✅ NUEVA FUNCIÓN PARA ELIMINAR MATERIA Y RECARGAR TODO
   const handleEliminarMateria = async (id: string) => {
     try {
       await eliminarMateria(id);
@@ -154,6 +202,7 @@ function App() {
   };
 
   if (loadingAuth) return <div className={styles.loading}>Cargando...</div>;
+  
   if (!isAuthenticated) {
     return (
       <AuthForm
@@ -173,8 +222,10 @@ function App() {
       />
     );
   }
-  if (materiasCargando)
+  
+  if (materiasCargando || examenesCargando) {
     return <div className={styles.loading}>Cargando tu agenda...</div>;
+  }
 
   return (
     <div className={styles.dashboard}>
@@ -204,7 +255,7 @@ function App() {
               examenes={examenes}
               onActualizarProfesor={actualizarProfesor}
               onEditarMateria={setMateriaEditando}
-              onEliminarMateria={handleEliminarMateria}  // ✅ CAMBIADO
+              onEliminarMateria={handleEliminarMateria}
               onAgregarTarea={handleAgregarTarea}
               onAgregarExamen={handleAgregarExamen}
               onCompletarTarea={completarTarea}
@@ -228,6 +279,19 @@ function App() {
         materia={materiaEditando}
         onClose={() => setMateriaEditando(null)}
         onActualizar={handleActualizarMateria}
+      />
+
+      {/* Modal para editar/crear exámenes con campo de nota */}
+      <ExamenModal
+        visible={mostrarExamenModal}
+        fecha={fechaExamenModal}
+        materias={materias}
+        examen={examenEditando}
+        onClose={() => {
+          setMostrarExamenModal(false);
+          setExamenEditando(null);
+        }}
+        onGuardar={handleGuardarExamen}
       />
 
       <DiaDetalleModal

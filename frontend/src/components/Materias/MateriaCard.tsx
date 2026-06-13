@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Plus, Trash2, CheckCircle, Clock, Edit } from "lucide-react";
 
-import type { Materia, Tarea, Examen } from "../../types";
+import type { Materia, Tarea, Examen, MateriaStats } from "../../types";
+import { MateriaPromedio } from "./MateriaPromedio"; // ← Importar el componente
 import styles from "./MateriaCard.module.css";
 import appStyles from "../../App.module.css";
 
 interface Props {
   materia: Materia;
   tareas: Tarea[];
-  examenes: Examen[];  // ← AGREGAR
+  examenes: Examen[];
+  materiaStats: MateriaStats; // Estadísticas de la materia
   onActualizarProfesor: (id: string, profesor: string) => void;
   onEditarMateria: (materia: Materia) => void;
   onEliminarMateria: (id: string) => void;
@@ -33,7 +35,8 @@ interface Props {
 export const MateriaCard = ({
   materia,
   tareas,
-  examenes,  
+  examenes,
+  materiaStats, // ← Recibir las estadísticas
   onActualizarProfesor,
   onEditarMateria,
   onEliminarMateria,
@@ -248,6 +251,10 @@ export const MateriaCard = ({
           </div>
         </div>
       )}
+
+      {/* ========== COMPONENTE DE PROMEDIO ========== */}
+      <MateriaPromedio stats={materiaStats} materiaId={materia._id} />
+      {/* ========== FIN COMPONENTE PROMEDIO ========== */}
 
       {/* Tareas pendientes */}
       <div>

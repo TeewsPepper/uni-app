@@ -33,3 +33,11 @@ export interface Examen {
   contenido: string;
   nota: number | null;
 }
+
+export interface MateriaStats {
+  promedio: number | null; // null cuando no hay exámenes calificados
+  cantidadExamenes: number; // total de exámenes (incluye no calificados)
+  notaMaxima: number | null;
+  notaMinima: number | null;
+  examenesCalificados: number; // solo los que tienen nota !== null
+}

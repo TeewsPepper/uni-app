@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, Edit, X } from 'lucide-react';
 import type { Tarea, Examen, Materia } from '../../types';
+
 import appStyles from '../../App.module.css';
 import styles from './DiaDetalleModal.module.css';
 

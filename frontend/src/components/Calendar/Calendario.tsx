@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { Tarea, Examen, Materia } from '../../types';
-import { DiaDetalleModal } from './DiaDetalleModal';
+
 import styles from './Calendario.module.css';
 
 interface Props {
