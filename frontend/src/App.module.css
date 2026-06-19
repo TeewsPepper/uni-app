@@ -1,26 +1,39 @@
-/* App.module.css - Tema oscuro estilo VS Code (RESPONSIVE) */
+/* ============================================
+   App.module.css - Tema oscuro estilo VS Code
+   ============================================ */
 
+/* ---------- DASHBOARD PRINCIPAL ---------- */
 .dashboard {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 24px;
   background: #1e1e1e;
   min-height: 100vh;
 }
 
-/* Responsive: padding en móvil */
+/* Pantallas ultra-wide */
+@media (min-width: 1920px) {
+  .dashboard {
+    max-width: 1600px;
+    padding: 20px;
+  }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
   .dashboard {
     padding: 16px;
   }
 }
 
+/* Móviles */
 @media (max-width: 480px) {
   .dashboard {
     padding: 12px;
   }
 }
 
+/* ---------- HEADER ---------- */
 .header {
   text-align: center;
   margin-bottom: 32px;
@@ -38,6 +51,12 @@
   }
 }
 
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 1.6rem;
+  }
+}
+
 .header p {
   color: #9cdcfe;
   margin-top: 8px;
@@ -49,6 +68,13 @@
   }
 }
 
+@media (max-width: 480px) {
+  .header p {
+    font-size: 0.8rem;
+  }
+}
+
+/* ---------- SECCIONES ---------- */
 .sectionHeader {
   display: flex;
   justify-content: space-between;
@@ -66,7 +92,7 @@
 }
 
 .sectionTitle {
-  color: #d4d4d4;
+  color: #a78bfa;
   margin: 0;
   display: flex;
   align-items: center;
@@ -77,46 +103,81 @@
 
 @media (max-width: 640px) {
   .sectionTitle {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionTitle {
     font-size: 1.1rem;
   }
 }
 
+
+/* ---------- GRID DE MATERIAS ---------- */
+/* Base: móviles */
 .materiaGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 16px;
   margin-top: 16px;
 }
 
-@media (max-width: 1024px) {
+/* Tablets en adelante: auto-fill mantiene ancho mínimo */
+@media (min-width: 768px) {
   .materiaGrid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
   }
 }
 
-@media (max-width: 768px) {
-  .materiaGrid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+/* ---------- TARJETAS DE MATERIA ---------- */
+.materiaCard {
+  background: #252526;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #3c3c3c;
+  transition: all 0.2s;
+}
+
+.materiaCard:hover {
+  border-color: #0e639c;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .materiaCard {
+    padding: 14px;
   }
 }
 
-/* Botones estilo VS Code */
-/* Botones compactos */
+/* Acciones dentro de la tarjeta */
+.materiaActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.materiaActions button {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ---------- BOTONES ---------- */
 .button {
-  padding: 4px 10px;
+  padding: 8px 12px;
   border: none;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-family: 'Inter', sans-serif;
   white-space: nowrap;
+  min-height: 36px;
 }
 
 .button svg {
@@ -125,66 +186,22 @@
 }
 
 @media (max-width: 640px) {
-    .button {
-    padding: 6px 10px;
-    font-size: 11px;
+  .button {
+    padding: 8px 12px;
+    font-size: 12px;
   }
-  
-  .button span {
-    display: inline; /* Mostrar texto en móvil */
-  }
-
 }
 
 @media (max-width: 480px) {
   .button {
-    padding: 5px 8px;
-  }
-  
-  .button span {
-    font-size: 10px;
+    padding: 6px 10px;
+    font-size: 11px;
+    min-height: 44px;
   }
 }
-
-/* .buttonPrimary {
-  background: #0e639c;
-  color: white;
-}
-
-.buttonPrimary:hover {
-  background: #1177bb;
-}
-
-.buttonSecondary {
-  background: #3c3c3c;
-  color: #cccccc;
-}
-
-.buttonSecondary:hover {
-  background: #4d4d4d;
-}
-
-.buttonDanger {
-  background: #a1260d;
-  color: white;
-}
-
-.buttonDanger:hover {
-  background: #c42b0f;
-}
-
-.buttonSuccess {
-  background: #2b5c2b;
-  color: white;
-}
-
-.buttonSuccess:hover {
-  background: #357e35;
-} */
- /* Reemplazar los colores principales en App.module.css */
 
 .buttonPrimary {
-  background: #7c3aed;  /* Violeta vibrante */
+  background: #7c3aed;
   color: white;
 }
 
@@ -219,41 +236,42 @@
   background: #047857;
 }
 
-/* Colores de acento */
-.sectionTitle {
-  color: #a78bfa;  /* Violeta claro */
-}
-
-/* Inputs */
-.input:focus, .select:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
-}
-
-/* Tarjetas de materia estilo VS Code */
-.materiaCard {
-  background: #252526;
+/* ---------- INPUTS Y SELECTS ---------- */
+.input, .select {
+  width: 100%;
+  padding: 8px 12px;
   border-radius: 6px;
-  padding: 16px;
   border: 1px solid #3c3c3c;
-  transition: all 0.2s;
-}
-
-.materiaCard:hover {
-  border-color: #0e639c;
-  transform: translateY(-2px);
+  background: #3c3c3c;
+  color: #d4d4d4;
+  font-size: 13px;
+  font-family: 'Segoe UI', 'SF Mono', monospace;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 @media (max-width: 640px) {
-  .materiaCard {
-    padding: 14px;
+  .input, .select {
+    padding: 10px 12px;
+    font-size: 16px;
   }
 }
 
-/* Modal oscuro */
+.input:focus, .select:focus {
+  outline: none;
+  border-color: #7c3aed;
+  background: #2d2d2d;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.input::placeholder {
+  color: #858585;
+}
+
+/* ---------- MODALES ---------- */
 .modalOverlay {
   position: fixed;
-  inset: 0; /* Equivalente a top:0; right:0; bottom:0; left:0 */
+  inset: 0;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
@@ -276,7 +294,9 @@
   .modalContent {
     padding: 20px;
     width: 95%;
+    max-width: 95%;
     max-height: 85vh;
+    margin: 10px auto;
   }
 }
 
@@ -308,56 +328,7 @@
   }
 }
 
-/* Inputs estilo VS Code */
-.input {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 4px;
-  border: 1px solid #3c3c3c;
-  background: #3c3c3c;
-  color: #d4d4d4;
-  font-size: 13px;
-  font-family: 'Segoe UI', 'SF Mono', monospace;
-  box-sizing: border-box;
-}
-
-@media (max-width: 640px) {
-  .input {
-    padding: 10px 12px;
-    font-size: 16px; /* Evita zoom en iOS */
-  }
-}
-
-.input:focus {
-  outline: none;
-  border-color: #0e639c;
-  background: #2d2d2d;
-}
-
-.input::placeholder {
-  color: #858585;
-}
-
-.select {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 4px;
-  border: 1px solid #3c3c3c;
-  background: #3c3c3c;
-  color: #d4d4d4;
-  font-size: 13px;
-  font-family: 'Segoe UI', 'SF Mono', monospace;
-  box-sizing: border-box;
-}
-
-@media (max-width: 640px) {
-  .select {
-    padding: 10px 12px;
-    font-size: 16px;
-  }
-}
-
-/* Calendario oscuro */
+/* ---------- CALENDARIO ---------- */
 .calendarioContainer {
   background: #252526;
   border-radius: 8px;
@@ -372,7 +343,54 @@
   }
 }
 
-/* Loading */
+/* Eventos del calendario */
+.fc .fc-daygrid-day-number {
+  font-size: 11px !important;
+}
+
+.fc .fc-daygrid-day-events {
+  min-height: 30px;
+}
+
+/* ---------- PRÓXIMOS EVENTOS ---------- */
+.diasGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.diaCard {
+  padding: 8px 4px;
+}
+
+.diaNombre {
+  font-size: 11px;
+}
+
+.diaNumero {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .diasGrid {
+    gap: 4px;
+  }
+  
+  .diaCard {
+    padding: 6px 2px;
+  }
+  
+  .diaNombre {
+    font-size: 9px;
+  }
+  
+  .diaNumero {
+    font-size: 14px;
+  }
+}
+
+/* ---------- OTROS COMPONENTES ---------- */
 .loading {
   text-align: center;
   padding: 40px;
@@ -387,7 +405,6 @@
   }
 }
 
-/* Icon button */
 .iconButton {
   background: none;
   border: none;
@@ -403,99 +420,17 @@
   background: #2d2d2d;
 }
 
-/* Fecha info */
 .fechaInfo {
   margin-bottom: 16px;
   font-size: 14px;
   color: #9cdcfe;
 }
 
-/* Textos */
+/* ---------- TEXTOS GENERALES ---------- */
 h2, h3, h4 {
   color: #d4d4d4;
 }
 
 label {
   color: #cccccc;
-}
-
-/* 
-  === OPTIMIZACIÓN PARA HUAWEI Y8P (360px de ancho) ===
-  Coloca esto al final de tu App.module.css 
-*/
-
-/* Ajuste principal del Dashboard */
-.dashboard {
-  padding: 12px; /* Menos padding en los bordes */
-  max-width: 100%; /* Que ocupe todo el ancho disponible */
-}
-
-/* Títulos más compactos */
-.sectionTitle {
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-}
-
-/* Grid de materias: En este ancho, que ocupe toda la fila */
-.materiaGrid {
-  grid-template-columns: 1fr; /* Una sola columna */
-  gap: 12px;
-}
-
-/* ========================================= */
-/* BOTONES MÁS CÓMODOS PARA DEDOS GORDOS */
-/* ========================================= */
-.button, .materiaActions button {
-  padding: 8px 12px;  /* Botones un poco más altos para tocar mejor */
-  font-size: 12px;
-  min-height: 36px;   /* Altura mínima recomendada para dedos */
-}
-
-/* En las cards de materia, los botones se acomodan solos */
-.materiaActions {
-  gap: 8px;
-}
-.materiaActions button {
-  flex: 1; /* Se reparten el espacio */
-  justify-content: center;
-}
-
-/* MODALES: En tu móvil, el modal debe respirar */
-.modalContent {
-  width: 95%;
-  max-width: 95%;
-  margin: 10px auto;
-  padding: 16px;
-  max-height: 85vh;
-}
-
-/* Header: Acomodamos el texto para que no explote */
-.header h1 {
-  font-size: 1.6rem;
-}
-.header p {
-  font-size: 0.8rem;
-}
-
-/* Tabla de días (Próximos Eventos) */
-.diasGrid {
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-.diaCard {
-  padding: 8px 2px;
-}
-.diaNombre {
-  font-size: 9px;
-}
-.diaNumero {
-  font-size: 16px;
-}
-
-/* Eventos dentro del calendario */
-.fc .fc-daygrid-day-number {
-  font-size: 11px !important;
-}
-.fc .fc-daygrid-day-events {
-  min-height: 30px;
 }

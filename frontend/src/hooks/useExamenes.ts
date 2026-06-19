@@ -1,95 +1,136 @@
 // frontend/src/hooks/useExamenes.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Examen } from '../types';
 
-interface UseExamenesReturn {
-  examenes: Examen[];
-  cargando: boolean;
-  agregarExamen: (examen: Omit<Examen, '_id' | 'materiaId'> & { materiaId: string }) => Promise<any>;
-  actualizarExamen: (id: string, datos: Partial<Examen>) => Promise<void>;
-  eliminarExamen: (id: string) => Promise<void>;
-  recargar: () => Promise<void>;
+// ✨ Constante para la API
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// ✨ Tipo para el error de fetch
+interface FetchError {
+  message: string;
+  status?: number;
 }
 
-export const useExamenes = (): UseExamenesReturn => {
-  const [examenes, setExamenes] = useState<Examen[]>([]);
-  const [cargando, setCargando] = useState(true);
+// ✨ Helper para manejar errores
+const handleFetchError = (error: unknown): FetchError => {
+  if (error instanceof Error) {
+    return { message: error.message };
+  }
+  return { message: 'Error desconocido' };
+};
 
-  const cargarExamenes = async () => {
+// ✨ Tipo para crear un nuevo examen (sin _id, y materiaId como string)
+export type NuevoExamen = Omit<Examen, '_id' | 'materiaId'> & { materiaId: string };
+
+// ✨ Tipo para actualizar un examen
+export type ActualizarExamen = Partial<Omit<Examen, '_id'>>;
+
+const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+};
+
+export const useExamenes = () => {
+  const [examenes, setExamenes] = useState<Examen[]>([]);
+  const [cargando, setCargando] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const cargarExamenes = useCallback(async (): Promise<void> => {
+    setCargando(true);
+    setError(null);
     try {
-      const res = await fetch('http://localhost:3001/api/examenes', {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-      if (!res.ok) throw new Error('Error al cargar exámenes');
-      const data = await res.json();
+      const res = await fetchWithAuth(`${API_BASE_URL}/examenes`);
+      if (!res.ok) throw new Error(`Error al cargar exámenes: ${res.status}`);
+      const data = await res.json() as Examen[];
       setExamenes(data);
-    } catch (error) {
-      console.error('Error cargando exámenes:', error);
+    } catch (err) {
+      const { message } = handleFetchError(err);
+      setError(message);
+      console.error('Error cargando exámenes:', err);
     } finally {
       setCargando(false);
     }
-  };
+  }, []);
 
-  const agregarExamen = async (examen: Omit<Examen, '_id' | 'materiaId'> & { materiaId: string }) => {
+  const agregarExamen = useCallback(async (examen: NuevoExamen): Promise<void> => {
+    setError(null);
     try {
-      const res = await fetch('http://localhost:3001/api/examenes', {
+      const res = await fetchWithAuth(`${API_BASE_URL}/examenes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(examen)
       });
-      if (!res.ok) throw new Error('Error al agregar examen');
-      const nuevoExamen = await res.json();
-      setExamenes([...examenes, nuevoExamen]);
-      return nuevoExamen;
-    } catch (error) {
-      console.error('Error agregando examen:', error);
-      throw error;
+      
+      if (!res.ok) throw new Error(`Error al agregar examen: ${res.status}`);
+      
+      const nuevoExamen = await res.json() as Examen;
+      setExamenes(prev => [...prev, nuevoExamen]);
+    } catch (err) {
+      const { message } = handleFetchError(err);
+      setError(message);
+      console.error('Error agregando examen:', err);
+      throw err;
     }
-  };
+  }, []);
 
-  // NUEVA FUNCIÓN: Actualizar examen
-  const actualizarExamen = async (id: string, datos: Partial<Examen>) => {
+  const actualizarExamen = useCallback(async (id: string, datos: ActualizarExamen): Promise<void> => {
+    setError(null);
     try {
-      const res = await fetch(`http://localhost:3001/api/examenes/${id}`, {
+      const res = await fetchWithAuth(`${API_BASE_URL}/examenes/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(datos)
       });
-      if (!res.ok) throw new Error('Error al actualizar examen');
-      const examenActualizado = await res.json();
-      setExamenes(examenes.map(e => e._id === id ? examenActualizado : e));
-    } catch (error) {
-      console.error('Error actualizando examen:', error);
-      throw error;
+      
+      if (!res.ok) throw new Error(`Error al actualizar examen: ${res.status}`);
+      
+      const examenActualizado = await res.json() as Examen;
+      setExamenes(prev => prev.map(e => e._id === id ? examenActualizado : e));
+    } catch (err) {
+      const { message } = handleFetchError(err);
+      setError(message);
+      console.error('Error actualizando examen:', err);
+      throw err;
     }
-  };
+  }, []);
 
-  const eliminarExamen = async (id: string) => {
+  const eliminarExamen = useCallback(async (id: string): Promise<void> => {
+    setError(null);
     try {
-      const res = await fetch(`http://localhost:3001/api/examenes/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
+      const res = await fetchWithAuth(`${API_BASE_URL}/examenes/${id}`, {
+        method: 'DELETE'
       });
-      if (!res.ok) throw new Error('Error al eliminar examen');
-      setExamenes(examenes.filter(e => e._id !== id));
-    } catch (error) {
-      console.error('Error eliminando examen:', error);
+      
+      if (!res.ok) throw new Error(`Error al eliminar examen: ${res.status}`);
+      
+      setExamenes(prev => prev.filter(e => e._id !== id));
+    } catch (err) {
+      const { message } = handleFetchError(err);
+      setError(message);
+      console.error('Error eliminando examen:', err);
     }
-  };
+  }, []);
 
+  const recargar = useCallback(async (): Promise<void> => {
+    await cargarExamenes();
+  }, [cargarExamenes]);
+
+  // Cargar exámenes al montar el hook
   useEffect(() => {
     cargarExamenes();
-  }, []);
+  }, [cargarExamenes]);
 
   return { 
     examenes, 
-    cargando, 
+    cargando,
+    error,
     agregarExamen, 
-    actualizarExamen,  // ← AGREGADO
+    actualizarExamen, 
     eliminarExamen, 
-    recargar: cargarExamenes 
+    recargar 
   };
 };

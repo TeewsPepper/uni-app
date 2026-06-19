@@ -1,6 +1,16 @@
+// components/Calendar/DiaDetalleModal.tsx
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, CheckCircle, Edit, X } from 'lucide-react';
 import type { Tarea, Examen, Materia } from '../../types';
+
+// ✨ Importar tipos locales
+import type { 
+  EventoDelDia, 
+  EventoTarea, 
+  EventoExamen, 
+  EventoHorario,
+  DiasMap 
+} from './DiaDetalleModal.types';
 
 import appStyles from '../../App.module.css';
 import styles from './DiaDetalleModal.module.css';
@@ -20,7 +30,8 @@ interface Props {
   onEditarExamen?: (examen: Examen) => void;
 }
 
-const diasMap: { [key: string]: number } = {
+// ✨ Mapeo de días con tipo estricto
+const diasMap: DiasMap = {
   'Domingo': 0,
   'Lunes': 1,
   'Martes': 2,
@@ -39,6 +50,26 @@ const normalizarFecha = (fecha: Date | string): string => {
   return `${year}-${month}-${day}`;
 };
 
+// ✨ Type guard para verificar si materiaId es objeto poblado
+const isMateriaPoblada = (
+  materia: string | { _id: string; nombre: string; color?: string }
+): materia is { _id: string; nombre: string; color?: string } => {
+  return typeof materia !== 'string' && 'nombre' in materia;
+};
+
+// ✨ Type guards para EventoDelDia
+const esEventoExamen = (evento: EventoDelDia): evento is EventoExamen => {
+  return evento.type === 'examen';
+};
+
+const esEventoHorario = (evento: EventoDelDia): evento is EventoHorario => {
+  return evento.type === 'horario';
+};
+
+const esEventoTarea = (evento: EventoDelDia): evento is EventoTarea => {
+  return evento.type === 'tarea';
+};
+
 export const DiaDetalleModal = ({ 
   visible, 
   fecha, 
@@ -53,7 +84,7 @@ export const DiaDetalleModal = ({
   onEliminarExamen,
   onEditarExamen
 }: Props) => {
-  const [eventosDelDia, setEventosDelDia] = useState<any[]>([]);
+  const [eventosDelDia, setEventosDelDia] = useState<EventoDelDia[]>([]);
   const [mostrarFormTarea, setMostrarFormTarea] = useState(false);
   const [mostrarFormExamen, setMostrarFormExamen] = useState(false);
   const [nuevaTarea, setNuevaTarea] = useState('');
@@ -65,31 +96,33 @@ export const DiaDetalleModal = ({
 
   useEffect(() => {
     if (fecha && visible) {
-      const eventos: any[] = [];
+      const eventos: EventoDelDia[] = [];
 
-      // Tareas del día - comparar strings YYYY-MM-DD directamente
+      // Tareas del día
       tareas.forEach(tarea => {
         const tareaFecha = normalizarFecha(tarea.fechaEntrega);
         if (tareaFecha === fecha && !tarea.completada) {
           const materia = materias.find(m => m._id === tarea.materiaId);
-          eventos.push({
+          const eventoTarea: EventoTarea = {
             type: 'tarea',
             id: tarea._id,
             titulo: tarea.titulo,
             materiaNombre: materia?.nombre || 'Sin materia',
             materiaId: tarea.materiaId,
             completada: tarea.completada
-          });
+          };
+          eventos.push(eventoTarea);
         }
       });
 
-      // Exámenes del día - comparar strings YYYY-MM-DD directamente
+      // Exámenes del día
       examenes.forEach(examen => {
         const examenFecha = normalizarFecha(examen.fecha);
         if (examenFecha === fecha) {
           let materiaNombre = '';
           let materiaId = '';
-          if (examen.materiaId && typeof examen.materiaId === 'object' && 'nombre' in examen.materiaId) {
+          
+          if (isMateriaPoblada(examen.materiaId)) {
             materiaNombre = examen.materiaId.nombre;
             materiaId = examen.materiaId._id;
           } else if (typeof examen.materiaId === 'string') {
@@ -99,7 +132,8 @@ export const DiaDetalleModal = ({
               materiaId = materia._id;
             }
           }
-          eventos.push({
+          
+          const eventoExamen: EventoExamen = {
             type: 'examen',
             id: examen._id,
             titulo: examen.titulo,
@@ -109,7 +143,8 @@ export const DiaDetalleModal = ({
             aula: examen.aula,
             contenido: examen.contenido,
             nota: examen.nota
-          });
+          };
+          eventos.push(eventoExamen);
         }
       });
 
@@ -123,7 +158,7 @@ export const DiaDetalleModal = ({
           materia.horarios.forEach(horario => {
             const diaSemana = diasMap[horario.dia];
             if (diaSemana === diaSemanaNum) {
-              eventos.push({
+              const eventoHorario: EventoHorario = {
                 type: 'horario',
                 titulo: materia.nombre,
                 materiaNombre: materia.nombre,
@@ -131,7 +166,8 @@ export const DiaDetalleModal = ({
                 horaFin: horario.horaFin,
                 aula: horario.aula,
                 color: materia.color
-              });
+              };
+              eventos.push(eventoHorario);
             }
           });
         }
@@ -139,8 +175,14 @@ export const DiaDetalleModal = ({
 
       // Ordenar eventos por hora
       eventos.sort((a, b) => {
-        const horaA = a.hora || a.horaInicio || '00:00';
-        const horaB = b.hora || b.horaInicio || '00:00';
+        const getHora = (evento: EventoDelDia): string => {
+          if (esEventoExamen(evento)) return evento.hora;
+          if (esEventoHorario(evento)) return evento.horaInicio;
+          return '00:00';
+        };
+        
+        const horaA = getHora(a);
+        const horaB = getHora(b);
         return horaA.localeCompare(horaB);
       });
 
@@ -180,6 +222,93 @@ export const DiaDetalleModal = ({
     day: 'numeric'
   });
 
+  // ✨ Función auxiliar para renderizar según tipo de evento (con type narrowing)
+  const renderizarEvento = (evento: EventoDelDia, idx: number) => {
+    const getIcon = () => {
+      if (esEventoTarea(evento)) return '📝';
+      if (esEventoExamen(evento)) return '📚';
+      return '🏫';
+    };
+
+    const getHoraDisplay = () => {
+      if (esEventoExamen(evento)) return `🕐 ${evento.hora}`;
+      if (esEventoHorario(evento)) return `🕐 ${evento.horaInicio} - ${evento.horaFin}`;
+      return null;
+    };
+
+    // ✅ Type narrowing seguro para 'aula'
+    const getAula = (): string | null => {
+      if (esEventoExamen(evento)) return evento.aula;
+      if (esEventoHorario(evento)) return evento.aula;
+      return null; // Las tareas no tienen aula
+    };
+
+    const aula = getAula();
+
+    return (
+      <div key={idx} className={`${styles.eventoCard} ${styles[evento.type]}`}>
+        <div className={styles.eventoHeader}>
+          <span className={styles.eventoIcon}>{getIcon()}</span>
+          <span className={styles.eventoTitulo}>{evento.titulo}</span>
+          <span className={styles.eventoMateria}>{evento.materiaNombre}</span>
+        </div>
+        
+        {getHoraDisplay() && (
+          <div className={styles.eventoHora}>{getHoraDisplay()}</div>
+        )}
+        
+        {/* ✅ Ahora 'aula' es seguro porque usamos getAula() */}
+        {aula && (
+          <div className={styles.eventoAula}>📍 Aula: {aula}</div>
+        )}
+        
+        {esEventoExamen(evento) && evento.nota !== null && (
+          <div className={styles.eventoNota}>⭐ Nota: {evento.nota}</div>
+        )}
+        
+        {!esEventoHorario(evento) && (
+          <div className={styles.eventoActions}>
+            {esEventoTarea(evento) && onCompletarTarea && (
+              <button 
+                onClick={() => onCompletarTarea(evento.id)}
+                className={styles.actionBtn}
+                title="Completar"
+              >
+                <CheckCircle size={14} />
+              </button>
+            )}
+            {esEventoExamen(evento) && onEditarExamen && (
+              <button 
+                onClick={() => {
+                  const examen = examenes.find(e => e._id === evento.id);
+                  if (examen) onEditarExamen(examen);
+                  onClose();
+                }}
+                className={styles.actionBtn}
+                title="Editar"
+              >
+                <Edit size={14} />
+              </button>
+            )}
+            <button 
+              onClick={() => {
+                if (esEventoTarea(evento) && onEliminarTarea) {
+                  onEliminarTarea(evento.id);
+                } else if (esEventoExamen(evento) && onEliminarExamen) {
+                  onEliminarExamen(evento.id);
+                }
+              }}
+              className={styles.actionBtn}
+              title="Eliminar"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={appStyles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -194,73 +323,7 @@ export const DiaDetalleModal = ({
           {eventosDelDia.length === 0 ? (
             <div className={styles.sinEventos}>No hay actividades programadas</div>
           ) : (
-            eventosDelDia.map((evento, idx) => (
-              <div key={idx} className={`${styles.eventoCard} ${styles[evento.type]}`}>
-                <div className={styles.eventoHeader}>
-                  <span className={styles.eventoIcon}>
-                    {evento.type === 'tarea' && '📝'}
-                    {evento.type === 'examen' && '📚'}
-                    {evento.type === 'horario' && '🏫'}
-                  </span>
-                  <span className={styles.eventoTitulo}>{evento.titulo}</span>
-                  <span className={styles.eventoMateria}>{evento.materiaNombre}</span>
-                </div>
-                
-                {(evento.hora || evento.horaInicio) && (
-                  <div className={styles.eventoHora}>
-                    🕐 {evento.hora || `${evento.horaInicio} - ${evento.horaFin}`}
-                  </div>
-                )}
-                
-                {evento.aula && (
-                  <div className={styles.eventoAula}>📍 Aula: {evento.aula}</div>
-                )}
-                
-                {evento.type === 'examen' && evento.nota !== null && (
-                  <div className={styles.eventoNota}>⭐ Nota: {evento.nota}</div>
-                )}
-                
-                {evento.type !== 'horario' && (
-                  <div className={styles.eventoActions}>
-                    {evento.type === 'tarea' && onCompletarTarea && (
-                      <button 
-                        onClick={() => onCompletarTarea(evento.id)}
-                        className={styles.actionBtn}
-                        title="Completar"
-                      >
-                        <CheckCircle size={14} />
-                      </button>
-                    )}
-                    {evento.type === 'examen' && onEditarExamen && (
-                      <button 
-                        onClick={() => {
-                          const examen = examenes.find(e => e._id === evento.id);
-                          if (examen) onEditarExamen(examen);
-                          onClose();
-                        }}
-                        className={styles.actionBtn}
-                        title="Editar"
-                      >
-                        <Edit size={14} />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => {
-                        if (evento.type === 'tarea' && onEliminarTarea) {
-                          onEliminarTarea(evento.id);
-                        } else if (evento.type === 'examen' && onEliminarExamen) {
-                          onEliminarExamen(evento.id);
-                        }
-                      }}
-                      className={styles.actionBtn}
-                      title="Eliminar"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))
+            eventosDelDia.map((evento, idx) => renderizarEvento(evento, idx))
           )}
         </div>
 

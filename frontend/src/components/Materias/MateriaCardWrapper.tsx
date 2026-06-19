@@ -1,3 +1,5 @@
+// frontend/src/components/Materias/MateriaCardWrapper.tsx
+import { memo } from 'react';
 import { useMateriaStats } from "../../hooks/useMateriaStats";
 import { MateriaCard } from "./MateriaCard";
 import type { Materia, Tarea, Examen } from "../../types";
@@ -17,12 +19,11 @@ interface MateriaCardWrapperProps {
   onEditarExamen?: (examen: Examen) => void;
 }
 
-export const MateriaCardWrapper = ({ 
+export const MateriaCardWrapper = memo(({ 
   materia, 
   examenes,
   ...restProps 
-}: MateriaCardWrapperProps) => {
-  // Calcular estadísticas para esta materia
+}: MateriaCardWrapperProps) => {  // ✨ Sin tipo de retorno explícito
   const materiaStats = useMateriaStats(examenes, materia._id);
   
   return (
@@ -33,4 +34,6 @@ export const MateriaCardWrapper = ({
       {...restProps}
     />
   );
-};
+});
+
+MateriaCardWrapper.displayName = 'MateriaCardWrapper';
