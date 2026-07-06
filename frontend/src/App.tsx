@@ -166,6 +166,28 @@ function App() {
     setMostrarExamenModal(true);
   }, []);
 
+  // ✨ Abrir modal para crear un nuevo examen
+const handleAbrirModalExamen = useCallback((materiaId: string) => {
+  // Crear un objeto examen vacío para la materia
+  const nuevoExamen: Examen = {
+    _id: '', // ← ID vacío indica que es nuevo
+    titulo: '',
+    materiaId: materiaId,
+    fecha: new Date().toISOString(),
+    hora: '',
+    aula: '',
+    contenido: '',
+    nota: null
+  };
+  
+  // Usar la fecha de hoy como fecha predeterminada
+  const fechaStr = new Date().toISOString().split('T')[0];
+  
+  setExamenEditando(nuevoExamen);
+  setFechaExamenModal(fechaStr);
+  setMostrarExamenModal(true);
+}, []);
+
   const handleGuardarExamen = useCallback(async (datos: {
     titulo: string;
     materiaId: string;
@@ -280,6 +302,7 @@ function App() {
               onEliminarTarea={eliminarTarea}
               onEliminarExamen={eliminarExamen}
               onEditarExamen={handleEditarExamen}
+              onAbrirModalExamen={handleAbrirModalExamen}
             />
           ))}
         </div>

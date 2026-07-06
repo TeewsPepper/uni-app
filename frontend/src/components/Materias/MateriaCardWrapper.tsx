@@ -17,6 +17,7 @@ interface MateriaCardWrapperProps {
   onEliminarTarea: (id: string) => void;
   onEliminarExamen: (id: string) => void;
   onEditarExamen?: (examen: Examen) => void;
+  onAbrirModalExamen?: (materiaId: string) => void;
 }
 
 export const MateriaCardWrapper = memo(({ 

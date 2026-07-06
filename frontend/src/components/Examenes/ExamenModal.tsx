@@ -1,29 +1,14 @@
-// frontend/src/components/Dashboard/ExamenModal.tsx
+
 import { useState, useEffect } from 'react';
 import type { Materia, Examen } from '../../types';
+import type { FormDataExamen, DatosExamen } from '../../utils/examenHelpers';
+import { 
+  examenToFormData, 
+  formDataToDatosExamen, 
+  formatearFechaDMY 
+} from '../../utils/examenHelpers';
 import styles from './ExamenModal.module.css';
 import appStyles from '../../App.module.css';
-
-// ✨ Tipos para el formulario
-interface FormData {
-  titulo: string;
-  materiaId: string;
-  hora: string;
-  aula: string;
-  contenido: string;
-  nota: string;
-}
-
-// ✨ Datos para guardar (sin el string de nota)
-interface DatosGuardar {
-  titulo: string;
-  materiaId: string;
-  fecha: string;
-  hora: string;
-  aula: string;
-  contenido: string;
-  nota: number | null;
-}
 
 interface Props {
   visible: boolean;
@@ -31,29 +16,11 @@ interface Props {
   materias: Materia[];
   examen?: Examen | null;
   onClose: () => void;
-  onGuardar: (datos: DatosGuardar) => Promise<void>;
+  onGuardar: (datos: DatosExamen) => Promise<void>;
 }
 
-// ✨ Helper para validar y convertir nota
-const parseNota = (notaStr: string): number | null => {
-  if (!notaStr.trim()) return null;
-  const notaNum = parseFloat(notaStr);
-  if (isNaN(notaNum)) return null;
-  // Limitar entre 0 y 10
-  return Math.min(10, Math.max(0, notaNum));
-};
-
-// ✨ Helper para obtener materiaId de forma segura
-const getMateriaId = (examen: Examen | null | undefined): string => {
-  if (!examen) return '';
-  return typeof examen.materiaId === 'string' 
-    ? examen.materiaId 
-    : examen.materiaId._id;
-};
-
 export const ExamenModal = ({ visible, fecha, materias, examen, onClose, onGuardar }: Props) => {
-  // ✨ Estado unificado para el formulario
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<FormDataExamen>({
     titulo: '',
     materiaId: '',
     hora: '',
@@ -62,70 +29,38 @@ export const ExamenModal = ({ visible, fecha, materias, examen, onClose, onGuard
     nota: ''
   });
 
-  // ✨ Cargar datos del examen si estamos en modo edición
   useEffect(() => {
-    if (examen) {
-      setFormData({
-        titulo: examen.titulo,
-        materiaId: getMateriaId(examen),
-        hora: examen.hora || '',
-        aula: examen.aula || '',
-        contenido: examen.contenido || '',
-        nota: examen.nota?.toString() || ''
-      });
-    } else {
-      setFormData({
-        titulo: '',
-        materiaId: '',
-        hora: '',
-        aula: '',
-        contenido: '',
-        nota: ''
-      });
-    }
+    setFormData(examenToFormData(examen));
   }, [examen, visible]);
 
-  // ✨ Actualizar campos individuales
-  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
+  const updateField = <K extends keyof FormDataExamen>(field: K, value: FormDataExamen[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   if (!visible) return null;
 
-  const fechaFormateada = fecha.split('-').reverse().join('/');
-
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     
     if (!formData.titulo.trim() || !formData.materiaId) {
-      return; // Validación básica
+      return;
     }
 
-    const notaNum = parseNota(formData.nota);
-
-    await onGuardar({
-      titulo: formData.titulo.trim(),
-      materiaId: formData.materiaId,
-      fecha: fecha,
-      hora: formData.hora,
-      aula: formData.aula.trim(),
-      contenido: formData.contenido.trim(),
-      nota: notaNum
-    });
-    
+    const datos = formDataToDatosExamen(formData, fecha);
+    await onGuardar(datos);
     onClose();
   };
 
   return (
     <div className={appStyles.modalOverlay} onClick={onClose}>
       <div className={appStyles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <h3>{examen ? '✏️ Editar Examen' : '📚 Nuevo Examen'}</h3>
-        <div className={styles.fechaInfo}>Fecha: {fechaFormateada}</div>
+        <h3>{examen ? '✏️ Editar Parcial' : '📚 Nuevo Parcial'}</h3>
+        <div className={styles.fechaInfo}>Fecha: {formatearFechaDMY(fecha)}</div>
         
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Título del examen *"
+            placeholder="Título del parcial"
             value={formData.titulo}
             onChange={(e) => updateField('titulo', e.target.value)}
             required

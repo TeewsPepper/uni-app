@@ -36,8 +36,8 @@ export interface Examen {
   _id: string;
   titulo: string;
   // ✨ Tipo explícito para materiaId (reemplaza unión genérica)
-  materiaId: string | MateriaInfo;
-  fecha: Date | string;
+  materiaId: string | { _id: string; nombre: string };
+  fecha: string;
   hora: string;
   aula: string;
   contenido: string;

@@ -115,7 +115,7 @@
 
 
 /* ---------- GRID DE MATERIAS ---------- */
-/* Base: móviles */
+/* Base: móviles (1 columna) */
 .materiaGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -123,16 +123,48 @@
   margin-top: 16px;
 }
 
-/* Tablets en adelante: auto-fill mantiene ancho mínimo */
-@media (min-width: 768px) {
+/* Tablets grandes: 2 columnas */
+@media (min-width: 600px) {
   .materiaGrid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Escritorio pequeño (19"): 3 columnas */
+@media (min-width: 900px) {
+  .materiaGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Escritorio mediano (23"): 4 columnas */
+@media (min-width: 1280px) {
+  .materiaGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+}
+
+/* Escritorio grande: 5 columnas */
+@media (min-width: 1600px) {
+  .materiaGrid {
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
   }
 }
 
+/* Ultra-wide: 6 columnas */
+@media (min-width: 1920px) {
+  .materiaGrid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 24px;
+  }
+}
+
 /* ---------- TARJETAS DE MATERIA ---------- */
-.materiaCard {
+/* .materiaCard {
   background: #252526;
   border-radius: 6px;
   padding: 16px;
@@ -149,10 +181,10 @@
   .materiaCard {
     padding: 14px;
   }
-}
+} */
 
 /* Acciones dentro de la tarjeta */
-.materiaActions {
+/* .materiaActions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
@@ -162,7 +194,7 @@
   flex: 1;
   justify-content: center;
 }
-
+ */
 /* ---------- BOTONES ---------- */
 .button {
   padding: 8px 12px;

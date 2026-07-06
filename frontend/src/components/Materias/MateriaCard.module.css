@@ -1,5 +1,7 @@
 /* MateriaCard.module.css - Tema oscuro con botones compactos */
 
+/* MateriaCard.module.css - Tema oscuro con botones compactos */
+
 .materiaCard {
   background: #252526;
   border-radius: 8px;
@@ -13,6 +15,7 @@
   transform: translateY(-2px);
 }
 
+/* ---------- HEADER DE MATERIA ---------- */
 .materiaHeader {
   display: flex;
   justify-content: space-between;
@@ -26,11 +29,11 @@
 
 .materiaTitle {
   flex: 1;
-  min-width: 0; /* Permite que el texto se corte */
+  min-width: 0;
 }
 
 .materiaTitle h3 {
-  margin: 0 0 6px 0;
+  margin:  0;
   font-size: 1rem;
   color: #d4d4d4;
   word-break: break-word;
@@ -66,7 +69,36 @@
   height: 10px;
 }
 
-/* Responsive para móvil */
+/* ---------- RESPONSIVE HEADER ---------- */
+/* Pantallas entre 641px y 1023px (tablets) */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .materiaHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .materiaTitle {
+    width: 100%;
+  }
+  
+  .profesorInput {
+    max-width: 100%;
+  }
+  
+  .materiaActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .materiaActions button {
+    padding: 4px 8px;
+    font-size: 10px;
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Móviles (640px y menos) */
 @media (max-width: 640px) {
   .materiaCard {
     padding: 12px;
@@ -74,6 +106,7 @@
   
   .materiaHeader {
     flex-direction: column;
+    align-items: stretch;
   }
   
   .materiaTitle {
@@ -97,6 +130,7 @@
   }
 }
 
+/* Móviles muy pequeños (480px y menos) */
 @media (max-width: 480px) {
   .materiaActions button span {
     display: none;

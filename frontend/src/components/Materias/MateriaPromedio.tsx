@@ -42,7 +42,7 @@ export const MateriaPromedio = ({ stats, materiaId }: MateriaPromedioProps) => {
         className={styles.promedioCard}
         style={{ borderLeftColor: color }}
       >
-        <div className={styles.promedioLabel}>Promedio de Exámenes</div>
+        <div className={styles.promedioLabel}>Promedio General</div>
         
         <div style={{ width: '70px', height: '70px', margin: '0 auto' }}>
           <CircularProgressbar
