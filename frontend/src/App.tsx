@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// frontend/src/App.tsx
+import { useState, useEffect, useCallback } from "react";
 import { BookOpen } from "lucide-react";
 import { useMaterias } from "./hooks/useMaterias";
 import { useTareas } from "./hooks/useTareas";
@@ -7,21 +8,44 @@ import { AuthForm } from "./components/Auth/AuthForm";
 import { DashboardHeader } from "./components/Dashboard/DashboardHeader";
 import { MateriaEditModal } from "./components/Materias/MateriaEditModal";
 import { MateriaForm } from "./components/Materias/MateriaForm";
-import { MateriaCard } from "./components/Materias/MateriaCard";
+import { MateriaCardWrapper as MateriaCard } from "./components/Materias/MateriaCardWrapper";
 import { Calendario } from "./components/Calendar/Calendario";
 import { ProximosEventos } from "./components/Calendar/ProximosEventos";
 import { DiaDetalleModal } from "./components/Calendar/DiaDetalleModal";
-import type { Materia, Horario } from "./types";
+import { ExamenModal } from "./components/Examenes/ExamenModal";
+import type { Materia, Horario, Examen } from "./types";
 import styles from "./App.module.css";
 
+// ✨ Constantes para la API
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// ✨ Función para formatear fecha a ISO sin zona horaria
+const toLocalISODate = (fecha: string): string => {
+  const [year, month, day] = fecha.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  return date.toISOString();
+};
+
+// ✨ Función para extraer fecha YYYY-MM-DD de un objeto Date
+const extractDateFromDate = (fecha: Date): string => {
+  const year = fecha.getFullYear();
+  const month = String(fecha.getMonth() + 1).padStart(2, '0');
+  const day = String(fecha.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [materiaEditando, setMateriaEditando] = useState<Materia | null>(null);
-  const [mostrarModalDia, setMostrarModalDia] = useState(false);
-  const [fechaSeleccionada, setFechaSeleccionada] = useState("");
+  const [mostrarModalDia, setMostrarModalDia] = useState<boolean>(false);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState<string>("");
+  
+  const [examenEditando, setExamenEditando] = useState<Examen | null>(null);
+  const [mostrarExamenModal, setMostrarExamenModal] = useState<boolean>(false);
+  const [fechaExamenModal, setFechaExamenModal] = useState<string>("");
 
   const {
     materias,
@@ -32,61 +56,69 @@ function App() {
     actualizarMateria,
     eliminarMateria,
   } = useMaterias();
-  const { tareas, cargarTareas, agregarTarea, completarTarea, eliminarTarea } =
-    useTareas();
+  
+  const { tareas, cargarTareas, agregarTarea, completarTarea, eliminarTarea } = useTareas();
+  
   const {
     examenes,
-    cargando,
+    cargando: examenesCargando,
     agregarExamen,
     actualizarExamen,
     eliminarExamen,
     recargar,
   } = useExamenes();
 
+  // ✨ Verificar autenticación al cargar
   useEffect(() => {
-    fetch("http://localhost:3001/api/auth/me", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
+    const verificarAuth = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, { credentials: "include" });
+        const data = await res.json();
+        
         if (data.user) {
           setIsAuthenticated(true);
           setUserEmail(data.user.email);
         } else {
           setIsAuthenticated(false);
         }
-      })
-      .catch(() => setIsAuthenticated(false))
-      .finally(() => setLoadingAuth(false));
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setLoadingAuth(false);
+      }
+    };
+    
+    verificarAuth();
   }, []);
 
-  const handleLogout = async () => {
-    await fetch("http://localhost:3001/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    setIsAuthenticated(false);
-    setUserEmail("");
-  };
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setIsAuthenticated(false);
+      setUserEmail("");
+    }
+  }, []);
 
-  const handleAgregarTarea = async (
+  const handleAgregarTarea = useCallback(async (
     materiaId: string,
     titulo: string,
     fecha: string,
   ) => {
     try {
-      const [year, month, day] = fecha.split("-");
-      const fechaAjustada = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-      );
-      await agregarTarea(titulo, materiaId, fechaAjustada.toISOString());
+      const fechaISO = toLocalISODate(fecha);
+      await agregarTarea(titulo, materiaId, fechaISO);
       await cargarTareas();
-    } catch {
-      setError("No se pudo agregar la tarea");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "No se pudo agregar la tarea";
+      setError(errorMessage);
     }
-  };
+  }, [agregarTarea, cargarTareas]);
 
-  const handleAgregarExamen = async (
+  const handleAgregarExamen = useCallback(async (
     materiaId: string,
     titulo: string,
     fecha: string,
@@ -94,28 +126,24 @@ function App() {
     aula: string,
   ) => {
     try {
-      const [year, month, day] = fecha.split("-");
-      const fechaAjustada = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-      );
+      const fechaISO = toLocalISODate(fecha);
       await agregarExamen({
         titulo,
         materiaId,
-        fecha: fechaAjustada.toISOString(),
+        fecha: fechaISO,
         hora,
         aula,
         contenido: "",
         nota: null,
       });
       await recargar();
-    } catch {
-      setError("No se pudo agregar el examen");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "No se pudo agregar el examen";
+      setError(errorMessage);
     }
-  };
+  }, [agregarExamen, recargar]);
 
-  const handleActualizarMateria = async (
+  const handleActualizarMateria = useCallback(async (
     id: string,
     nombre: string,
     profesor: string,
@@ -125,56 +153,119 @@ function App() {
     try {
       await actualizarMateria(id, nombre, profesor, horarios, color);
       await cargarMaterias();
-    } catch {
-      setError("No se pudo actualizar la materia");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "No se pudo actualizar la materia";
+      setError(errorMessage);
     }
-  };
+  }, [actualizarMateria, cargarMaterias]);
 
-  const handleEditarExamen = (examen: any) => {
-    const fechaStr = new Date(examen.fecha).toISOString().split("T")[0];
-    setFechaSeleccionada(fechaStr);
-    setMostrarModalDia(true);
-  };
+  const handleEditarExamen = useCallback((examen: Examen) => {
+    setExamenEditando(examen);
+    const fechaStr = extractDateFromDate(new Date(examen.fecha));
+    setFechaExamenModal(fechaStr);
+    setMostrarExamenModal(true);
+  }, []);
 
-  const handleFechaClick = (fecha: string) => {
+  // ✨ Abrir modal para crear un nuevo examen
+const handleAbrirModalExamen = useCallback((materiaId: string) => {
+  // Crear un objeto examen vacío para la materia
+  const nuevoExamen: Examen = {
+    _id: '', // ← ID vacío indica que es nuevo
+    titulo: '',
+    materiaId: materiaId,
+    fecha: new Date().toISOString(),
+    hora: '',
+    aula: '',
+    contenido: '',
+    nota: null
+  };
+  
+  // Usar la fecha de hoy como fecha predeterminada
+  const fechaStr = new Date().toISOString().split('T')[0];
+  
+  setExamenEditando(nuevoExamen);
+  setFechaExamenModal(fechaStr);
+  setMostrarExamenModal(true);
+}, []);
+
+  const handleGuardarExamen = useCallback(async (datos: {
+    titulo: string;
+    materiaId: string;
+    fecha: string;
+    hora: string;
+    aula: string;
+    contenido: string;
+    nota: number | null;
+  }) => {
+    try {
+      if (examenEditando) {
+        await actualizarExamen(examenEditando._id, {
+          ...datos,
+          fecha: examenEditando.fecha
+        });
+      } else {
+        const fechaISO = toLocalISODate(datos.fecha);
+        await agregarExamen({
+          ...datos,
+          fecha: fechaISO
+        });
+      }
+      await recargar();
+      setMostrarExamenModal(false);
+      setExamenEditando(null);
+      setError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "No se pudo guardar el examen";
+      setError(errorMessage);
+    }
+  }, [examenEditando, actualizarExamen, agregarExamen, recargar]);
+
+  const handleFechaClick = useCallback((fecha: string) => {
     setFechaSeleccionada(fecha);
     setMostrarModalDia(true);
-  };
+  }, []);
 
-  // ✅ NUEVA FUNCIÓN PARA ELIMINAR MATERIA Y RECARGAR TODO
-  const handleEliminarMateria = async (id: string) => {
+  const handleEliminarMateria = useCallback(async (id: string) => {
     try {
       await eliminarMateria(id);
       await cargarMaterias();
       await cargarTareas();
       await recargar();
-    } catch {
-      setError("No se pudo eliminar la materia");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "No se pudo eliminar la materia";
+      setError(errorMessage);
     }
-  };
+  }, [eliminarMateria, cargarMaterias, cargarTareas, recargar]);
+
+  const handleLoginSuccess = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, { credentials: "include" });
+      const data = await res.json();
+      
+      if (data.user) {
+        setIsAuthenticated(true);
+        setUserEmail(data.user.email);
+        await Promise.all([
+          cargarMaterias(),
+          cargarTareas(),
+          recargar()
+        ]);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error al cargar los datos";
+      setError(errorMessage);
+    }
+  }, [cargarMaterias, cargarTareas, recargar]);
 
   if (loadingAuth) return <div className={styles.loading}>Cargando...</div>;
+  
   if (!isAuthenticated) {
-    return (
-      <AuthForm
-        onLogin={async () => {
-          const res = await fetch("http://localhost:3001/api/auth/me", {
-            credentials: "include",
-          });
-          const data = await res.json();
-          if (data.user) {
-            setIsAuthenticated(true);
-            setUserEmail(data.user.email);
-            await cargarMaterias();
-            await cargarTareas();
-            await recargar();
-          }
-        }}
-      />
-    );
+    return <AuthForm onLogin={handleLoginSuccess} />;
   }
-  if (materiasCargando)
+  
+  if (materiasCargando || examenesCargando) {
     return <div className={styles.loading}>Cargando tu agenda...</div>;
+  }
 
   return (
     <div className={styles.dashboard}>
@@ -204,13 +295,14 @@ function App() {
               examenes={examenes}
               onActualizarProfesor={actualizarProfesor}
               onEditarMateria={setMateriaEditando}
-              onEliminarMateria={handleEliminarMateria}  // ✅ CAMBIADO
+              onEliminarMateria={handleEliminarMateria}
               onAgregarTarea={handleAgregarTarea}
               onAgregarExamen={handleAgregarExamen}
               onCompletarTarea={completarTarea}
               onEliminarTarea={eliminarTarea}
               onEliminarExamen={eliminarExamen}
               onEditarExamen={handleEditarExamen}
+              onAbrirModalExamen={handleAbrirModalExamen}
             />
           ))}
         </div>
@@ -228,6 +320,18 @@ function App() {
         materia={materiaEditando}
         onClose={() => setMateriaEditando(null)}
         onActualizar={handleActualizarMateria}
+      />
+
+      <ExamenModal
+        visible={mostrarExamenModal}
+        fecha={fechaExamenModal}
+        materias={materias}
+        examen={examenEditando}
+        onClose={() => {
+          setMostrarExamenModal(false);
+          setExamenEditando(null);
+        }}
+        onGuardar={handleGuardarExamen}
       />
 
       <DiaDetalleModal

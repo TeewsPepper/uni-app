@@ -1,26 +1,40 @@
 // frontend/src/components/Auth/AuthForm.tsx
 import { useState } from 'react';
-import appStyles from '../../App.module.css';
+import styles from './AuthForm.module.css'; // ✨ Importar CSS Module local
+
+// ✨ Tipos para las respuestas de la API
+interface AuthResponse {
+  error?: string;
+  message?: string;
+  user?: {
+    id: string;
+    email: string;
+  };
+}
 
 interface Props {
   onLogin: () => void;
 }
 
-export const AuthForm = ({ onLogin }: Props) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+const API_BASE_URL = 'http://localhost:3001/api/auth';
+const ENDPOINTS = {
+  login: `${API_BASE_URL}/login`,
+  register: `${API_BASE_URL}/register`
+} as const;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+export const AuthForm = ({ onLogin }: Props) => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const endpoint = isLogin 
-      ? 'http://localhost:3001/api/auth/login'
-      : 'http://localhost:3001/api/auth/register';
+    const endpoint = isLogin ? ENDPOINTS.login : ENDPOINTS.register;
 
     try {
       const res = await fetch(endpoint, {
@@ -30,7 +44,7 @@ export const AuthForm = ({ onLogin }: Props) => {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await res.json();
+      const data = await res.json() as AuthResponse;
 
       if (res.ok) {
         onLogin();
@@ -38,55 +52,73 @@ export const AuthForm = ({ onLogin }: Props) => {
         setError(data.error || 'Error de autenticación');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Error de conexión con el servidor';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={appStyles.dashboard}>
-      <div className={appStyles.header}>
-        <h1>📚 Agenda Universitaria</h1>
-        <p>Iniciá sesión para organizar tus materias</p>
-      </div>
-      <div style={{ maxWidth: '400px', margin: '0 auto', background: 'white', borderRadius: '16px', padding: '24px' }}>
-        <h2>{isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className={appStyles.input}
-            style={{ marginBottom: '12px' }}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className={appStyles.input}
-            style={{ marginBottom: '12px' }}
-          />
-          {error && <div style={{ color: '#ef4444', fontSize: '14px', marginBottom: '12px' }}>{error}</div>}
+    <div className={styles.authContainer}>
+      <div className={styles.authCard}>
+        <div className={styles.authHeader}>
+          <h1>📚 Agenda Universitaria</h1>
+          <p>Organizá tus materias, tareas, exámenes, calificaciones y más</p>
+        </div>
+
+        <h2 className={styles.authTitle}>
+          {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+        </h2>
+
+        <form onSubmit={handleSubmit} className={styles.authForm}>
+          <div className={styles.formGroup}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className={styles.input}
+            />
+          </div>
+
+          {error && (
+            <div className={styles.errorMessage}>
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className={`${appStyles.button} ${appStyles.buttonPrimary}`}
-            disabled={loading}
-            style={{ width: '100%' }}
+            className={styles.submitButton}
+            disabled={loading || !email || !password}
           >
             {loading ? 'Cargando...' : (isLogin ? 'Ingresar' : 'Registrarme')}
           </button>
+
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', marginTop: '12px', width: '100%' }}
+            className={styles.toggleButton}
           >
-            {isLogin ? '¿No tenés cuenta? Registrate' : '¿Ya tenés cuenta? Iniciá sesión'}
+            {isLogin 
+              ? '¿No tenés cuenta? Registrate' 
+              : '¿Ya tenés cuenta? Iniciá sesión'}
           </button>
         </form>
       </div>

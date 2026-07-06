@@ -1,14 +1,18 @@
+// frontend/src/components/Materias/MateriaCard.tsx
 import { useState } from "react";
 import { Plus, Trash2, CheckCircle, Clock, Edit } from "lucide-react";
 
-import type { Materia, Tarea, Examen } from "../../types";
+import type { Materia, Tarea, Examen, MateriaStats } from "../../types";
+import { MateriaPromedio } from "./MateriaPromedio";
+import { formatDateShort } from "../../utils/dateHelpers";
 import styles from "./MateriaCard.module.css";
 import appStyles from "../../App.module.css";
 
 interface Props {
   materia: Materia;
   tareas: Tarea[];
-  examenes: Examen[];  // ← AGREGAR
+  examenes: Examen[];
+  materiaStats: MateriaStats;
   onActualizarProfesor: (id: string, profesor: string) => void;
   onEditarMateria: (materia: Materia) => void;
   onEliminarMateria: (id: string) => void;
@@ -28,67 +32,63 @@ interface Props {
   onEliminarTarea: (id: string) => void;
   onEliminarExamen: (id: string) => void;
   onEditarExamen?: (examen: Examen) => void;
+  onAbrirModalExamen?: (materiaId: string) => void; // ✨ NUEVO: Para abrir el modal
 }
+
+// ✨ Helper para obtener ID de materia desde examen
+const getMateriaIdFromExamen = (examen: Examen): string => {
+  return typeof examen.materiaId === 'string' 
+    ? examen.materiaId 
+    : examen.materiaId._id;
+};
 
 export const MateriaCard = ({
   materia,
   tareas,
-  examenes,  
+  examenes,
+  materiaStats,
   onActualizarProfesor,
   onEditarMateria,
   onEliminarMateria,
   onAgregarTarea,
-  onAgregarExamen,
   onCompletarTarea,
   onEliminarTarea,
   onEliminarExamen,
   onEditarExamen,
+  onAbrirModalExamen,
 }: Props) => {
-  const [mostrarFormTarea, setMostrarFormTarea] = useState(false);
-  const [mostrarFormExamen, setMostrarFormExamen] = useState(false);
-  const [nuevaTarea, setNuevaTarea] = useState("");
-  const [fechaTarea, setFechaTarea] = useState("");
-  const [nuevoExamen, setNuevoExamen] = useState("");
-  const [fechaExamen, setFechaExamen] = useState("");
-  const [horaExamen, setHoraExamen] = useState("");
-  const [aulaExamen, setAulaExamen] = useState("");
+  const [mostrarFormTarea, setMostrarFormTarea] = useState<boolean>(false);
+  const [nuevaTarea, setNuevaTarea] = useState<string>("");
+  const [fechaTarea, setFechaTarea] = useState<string>("");
 
+  // ✨ Filtrar tareas pendientes de esta materia
   const tareasPendientes = tareas.filter(
     (t) => t.materiaId === materia._id && !t.completada,
   );
   
-  const examenesMateria = examenes.filter(
-    (e) => {
-      const materiaId = typeof e.materiaId === 'string' ? e.materiaId : e.materiaId._id;
-      return materiaId === materia._id;
-    }
-  );
+  // ✨ Filtrar exámenes de esta materia
+  const examenesMateria = examenes.filter((e) => {
+    const materiaId = getMateriaIdFromExamen(e);
+    return materiaId === materia._id;
+  });
 
-  const handleAgregarTarea = async () => {
+  const handleAgregarTarea = async (): Promise<void> => {
     if (!nuevaTarea.trim() || !fechaTarea) return;
-    await onAgregarTarea(materia._id, nuevaTarea, fechaTarea);
+    await onAgregarTarea(materia._id, nuevaTarea.trim(), fechaTarea);
     setNuevaTarea("");
     setFechaTarea("");
     setMostrarFormTarea(false);
   };
 
-  const handleAgregarExamenSubmit = async () => {
-    if (!nuevoExamen.trim() || !fechaExamen) return;
-    await onAgregarExamen(materia._id, nuevoExamen, fechaExamen, horaExamen, aulaExamen);
-    setNuevoExamen("");
-    setFechaExamen("");
-    setHoraExamen("");
-    setAulaExamen("");
-    setMostrarFormExamen(false);
+  // ✨ Abrir modal para crear nuevo examen
+  const handleAbrirModalExamen = (): void => {
+    if (onAbrirModalExamen) {
+      onAbrirModalExamen(materia._id);
+    }
   };
 
   return (
-    <div 
-      className={styles.materiaCard} 
-      style={{ 
-        borderTop: `4px solid ${materia.color || '#0e639c'}`,
-      }}
-    >
+    <div className={styles.materiaCard}>
       <div className={styles.materiaHeader}>
         <div className={styles.materiaTitle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -115,31 +115,35 @@ export const MateriaCard = ({
           <button
             onClick={() => setMostrarFormTarea(!mostrarFormTarea)}
             className={`${appStyles.button} ${appStyles.buttonPrimary}`}
+            title="Agregar tarea"
           >
             <Plus size={14} /> Tarea
           </button>
           <button
-            onClick={() => setMostrarFormExamen(!mostrarFormExamen)}
+            onClick={handleAbrirModalExamen}
             className={`${appStyles.button} ${appStyles.buttonPrimary}`}
+            title="Agregar parcial"
           >
-            <Plus size={14} /> Examen
-          </button>
-          <button
-            onClick={() => onEliminarMateria(materia._id)}
-            className={`${appStyles.button} ${appStyles.buttonDanger}`}
-          >
-            <Trash2 size={14} /> Eliminar
+            <Plus size={14} /> Parcial
           </button>
           <button
             onClick={() => onEditarMateria(materia)}
             className={`${appStyles.button} ${appStyles.buttonSecondary}`}
+            title="Editar materia"
           >
             <Edit size={14} /> Editar
+          </button>
+          <button
+            onClick={() => onEliminarMateria(materia._id)}
+            className={`${appStyles.button} ${appStyles.buttonDanger}`}
+            title="Eliminar materia"
+          >
+            <Trash2 size={14} /> Eliminar
           </button>
         </div>
       </div>
 
-      {/* Formulario para agregar tarea */}
+      {/* ✨ Formulario para agregar tarea */}
       {mostrarFormTarea && (
         <div className={styles.tareaForm}>
           <div className={styles.tareaFormRow}>
@@ -167,6 +171,7 @@ export const MateriaCard = ({
               <button
                 onClick={handleAgregarTarea}
                 className={`${appStyles.button} ${appStyles.buttonSuccess}`}
+                disabled={!nuevaTarea.trim() || !fechaTarea}
               >
                 Guardar
               </button>
@@ -175,65 +180,15 @@ export const MateriaCard = ({
         </div>
       )}
 
-      {/* Formulario para agregar examen */}
-      {mostrarFormExamen && (
-        <div className={styles.tareaForm}>
-          <div className={styles.tareaFormRow}>
-            <input
-              type="text"
-              placeholder="Título del examen"
-              value={nuevoExamen}
-              onChange={(e) => setNuevoExamen(e.target.value)}
-              className={appStyles.input}
-              autoFocus
-            />
-            <input
-              type="date"
-              value={fechaExamen}
-              onChange={(e) => setFechaExamen(e.target.value)}
-              className={appStyles.input}
-            />
-            <input
-              type="time"
-              value={horaExamen}
-              onChange={(e) => setHoraExamen(e.target.value)}
-              className={appStyles.input}
-              placeholder="Hora"
-            />
-            <input
-              type="text"
-              placeholder="Aula"
-              value={aulaExamen}
-              onChange={(e) => setAulaExamen(e.target.value)}
-              className={appStyles.input}
-            />
-            <div className={styles.tareaFormButtons}>
-              <button
-                onClick={() => setMostrarFormExamen(false)}
-                className={appStyles.buttonSecondary}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAgregarExamenSubmit}
-                className={`${appStyles.button} ${appStyles.buttonSuccess}`}
-              >
-                Guardar Examen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Horarios */}
+      {/* ✨ Horarios */}
       {materia.horarios && materia.horarios.length > 0 && (
         <div className={styles.horariosSection}>
           <div className={styles.horariosHeader}>
-            <Clock size={14} /> Horarios de cursada
+            <Clock size={14} /> Horarios:
           </div>
           <div className={styles.horariosList}>
             {materia.horarios.map((horario, idx) => (
-              <div key={idx} className={styles.horarioItem}>
+              <div key={`${horario.dia}-${horario.horaInicio}-${idx}`} className={styles.horarioItem}>
                 <span className={styles.horarioDia}>{horario.dia}</span>
                 <span className={styles.horarioHora}>
                   {horario.horaInicio} - {horario.horaFin}
@@ -249,7 +204,10 @@ export const MateriaCard = ({
         </div>
       )}
 
-      {/* Tareas pendientes */}
+      {/* ✨ Componente de promedio */}
+      <MateriaPromedio stats={materiaStats} materiaId={materia._id} />
+
+      {/* ✨ Tareas pendientes */}
       <div>
         <h4 className={styles.tareasSubtitle}>📝 Tareas pendientes:</h4>
         {tareasPendientes.length === 0 ? (
@@ -261,26 +219,23 @@ export const MateriaCard = ({
                 <div className={styles.tareaInfo}>
                   <span className={styles.tareaTitulo}>{tarea.titulo}</span>
                   <span className={styles.tareaFecha}>
-                    📅{" "}
-                    {new Date(tarea.fechaEntrega).toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    📅 {formatDateShort(tarea.fechaEntrega)}
                   </span>
                 </div>
                 <div className={styles.tareaActions}>
                   <button
                     onClick={() => onCompletarTarea(tarea._id)}
                     className={appStyles.iconButton}
-                    title="Completar"
+                    title="Completar tarea"
+                    aria-label="Completar tarea"
                   >
                     <CheckCircle size={16} color="#10b981" />
                   </button>
                   <button
                     onClick={() => onEliminarTarea(tarea._id)}
                     className={appStyles.iconButton}
-                    title="Eliminar"
+                    title="Eliminar tarea"
+                    aria-label="Eliminar tarea"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>
@@ -291,11 +246,11 @@ export const MateriaCard = ({
         )}
       </div>
 
-      {/* Exámenes */}
+      {/* ✨ Exámenes */}
       <div style={{ marginTop: '16px' }}>
-        <h4 className={styles.tareasSubtitle}>📚 Exámenes:</h4>
+        <h4 className={styles.tareasSubtitle}>📚 Parciales:</h4>
         {examenesMateria.length === 0 ? (
-          <div className={styles.emptyState}>No hay exámenes programados ✨</div>
+          <div className={styles.emptyState}>No hay parciales programados ✨</div>
         ) : (
           <ul className={styles.tareaList}>
             {examenesMateria.map((examen) => (
@@ -303,12 +258,7 @@ export const MateriaCard = ({
                 <div className={styles.tareaInfo}>
                   <span className={styles.tareaTitulo}>{examen.titulo}</span>
                   <span className={styles.tareaFecha}>
-                    📅{" "}
-                    {new Date(examen.fecha).toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
+                    📅 {formatDateShort(examen.fecha)}
                     {examen.hora && ` - 🕐 ${examen.hora}`}
                     {examen.aula && ` - 📍 Aula ${examen.aula}`}
                     {examen.nota !== null && ` - ⭐ Nota: ${examen.nota}`}
@@ -319,7 +269,8 @@ export const MateriaCard = ({
                     <button
                       onClick={() => onEditarExamen(examen)}
                       className={appStyles.iconButton}
-                      title="Editar"
+                      title="Editar examen"
+                      aria-label="Editar examen"
                     >
                       <Edit size={16} color="#9cdcfe" />
                     </button>
@@ -327,7 +278,8 @@ export const MateriaCard = ({
                   <button
                     onClick={() => onEliminarExamen(examen._id)}
                     className={appStyles.iconButton}
-                    title="Eliminar"
+                    title="Eliminar examen"
+                    aria-label="Eliminar examen"
                   >
                     <Trash2 size={16} color="#ef4444" />
                   </button>

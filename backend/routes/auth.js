@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User from '../models/User.js'; // ¡Vamos a crear este modelo!
+import User from '../models/User.js'; 
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambiame';
