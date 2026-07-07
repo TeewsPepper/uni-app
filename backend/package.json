@@ -2,14 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "dist-backend/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build:ts": "tsc",
-    "build:frontend": "cd ../frontend && npm install && npm run build",
-    "copy:frontend": "rm -rf public && mkdir -p public && cp -r ../frontend/dist/* public/",
-    "build": "npm run build:ts && npm run build:frontend && npm run copy:frontend",
-    "start": "cross-env NODE_ENV=production node dist/server.js"
+    "build": "tsc",
+    "start": "cross-env NODE_ENV=production node dist-backend/server.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

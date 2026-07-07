@@ -61,16 +61,15 @@ app.use('/api/examenes', examenesRoutes);
 
 // ===== SERVIDOR DE FRONTEND EN PRODUCCIÓN =====
 if (process.env.NODE_ENV === 'production') {
-  // Servir archivos estáticos
-  app.use(express.static(path.join(__dirname, '../public')));
+  // ✅ Servir archivos estáticos desde dist/ (frontend compilado)
+  app.use(express.static(path.join(__dirname, '../dist')));
   
-  // ✅ CORREGIDO: Usar app.use en lugar de app.get
   app.use((req: Request, res: Response) => {
     if (req.path.startsWith('/api')) {
       res.status(404).json({ error: 'API endpoint not found' });
       return;
     }
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }
 
