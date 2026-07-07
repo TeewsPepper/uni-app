@@ -21,15 +21,16 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.2.0",
     "mongoose": "^9.6.3",
-    "parser": "^0.1.4"
-  },
-  "devDependencies": {
+    "parser": "^0.1.4",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.0.0"
+  },
+  "devDependencies": {
+    
     "cross-env": "^10.1.0",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
