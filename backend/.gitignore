@@ -1,10 +1,8 @@
-
-*.db
-mongodb-data/
-
-node.modules/
-.env
-.env.local
-
-
+# Backend specific
+dist/
+public/
 node_modules/
+.env
+.env.*
+!.env.example
+*.log
