@@ -2,7 +2,7 @@
 *.db
 mongodb-data/
 
-
+node.modules/
 .env
 .env.local
 

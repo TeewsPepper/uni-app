@@ -32,7 +32,7 @@ interface Props {
   onEliminarTarea: (id: string) => void;
   onEliminarExamen: (id: string) => void;
   onEditarExamen?: (examen: Examen) => void;
-  onAbrirModalExamen?: (materiaId: string) => void; // ✨ NUEVO: Para abrir el modal
+  onAbrirModalExamen?: (materiaId: string) => void; 
 }
 
 // ✨ Helper para obtener ID de materia desde examen

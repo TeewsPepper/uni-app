@@ -68,7 +68,7 @@ router.put("/:id", async (req, res) => {
     const examen = await Examen.findOneAndUpdate(
       { _id: req.params.id, usuarioId },
       req.body,
-      { new: true },
+      { returnDocument: 'after' } // ← Nueva sintaxis
     );
     if (!examen) return res.status(404).json({ error: "No encontrado" });
     res.json(examen);

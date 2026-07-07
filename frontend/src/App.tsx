@@ -188,37 +188,37 @@ const handleAbrirModalExamen = useCallback((materiaId: string) => {
   setMostrarExamenModal(true);
 }, []);
 
-  const handleGuardarExamen = useCallback(async (datos: {
-    titulo: string;
-    materiaId: string;
-    fecha: string;
-    hora: string;
-    aula: string;
-    contenido: string;
-    nota: number | null;
-  }) => {
-    try {
-      if (examenEditando) {
-        await actualizarExamen(examenEditando._id, {
-          ...datos,
-          fecha: examenEditando.fecha
-        });
-      } else {
-        const fechaISO = toLocalISODate(datos.fecha);
-        await agregarExamen({
-          ...datos,
-          fecha: fechaISO
-        });
-      }
-      await recargar();
-      setMostrarExamenModal(false);
-      setExamenEditando(null);
-      setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "No se pudo guardar el examen";
-      setError(errorMessage);
+const handleGuardarExamen = useCallback(async (datos: {
+  id?: string; // ← AGREGAR id (opcional)
+  titulo: string;
+  materiaId: string;
+  fecha: string;
+  hora: string;
+  aula: string;
+  contenido: string;
+  nota: number | null;
+}) => {
+  try {
+    if (datos.id) {
+      // ✅ Edición - tiene ID
+      await actualizarExamen(datos.id, datos);
+    } else {
+      // ✅ Creación - no tiene ID
+      const fechaISO = toLocalISODate(datos.fecha);
+      await agregarExamen({
+        ...datos,
+        fecha: fechaISO
+      });
     }
-  }, [examenEditando, actualizarExamen, agregarExamen, recargar]);
+    await recargar();
+    setMostrarExamenModal(false);
+    setExamenEditando(null);
+    setError(null);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "No se pudo guardar el examen";
+    setError(errorMessage);
+  }
+}, [actualizarExamen, agregarExamen, recargar]); // ← Quitar examenEditando de dependencias
 
   const handleFechaClick = useCallback((fecha: string) => {
     setFechaSeleccionada(fecha);

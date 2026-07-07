@@ -1,7 +1,7 @@
-
 import type { Examen } from '../types';
 
 export interface DatosExamen {
+  id?: string; // ← AGREGAR id (opcional, para edición)
   titulo: string;
   materiaId: string;
   fecha: string;
@@ -42,11 +42,16 @@ export const getMateriaIdFromExamen = (examen: Examen | null | undefined): strin
 
 /**
  * Convierte FormData a DatosExamen para guardar
+ * @param formData - Datos del formulario
+ * @param fecha - Fecha en formato YYYY-MM-DD
+ * @param examenId - ID del examen (para edición)
  */
 export const formDataToDatosExamen = (
   formData: FormDataExamen,
-  fecha: string
+  fecha: string,
+  examenId?: string // ← AGREGAR parámetro examenId
 ): DatosExamen => ({
+  id: examenId, // ← INCLUIR ID si existe
   titulo: formData.titulo.trim(),
   materiaId: formData.materiaId,
   fecha: fecha,

@@ -7,7 +7,7 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambiame';
 
 // Middleware para verificar token desde cookie
-export const verificarToken = (req, res, next) => {
+export const verificarToken = async (req, res, next) => {
   const token = req.cookies.token;
   
   if (!token) {
@@ -16,10 +16,22 @@ export const verificarToken = (req, res, next) => {
   
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.userId;
+    
+    // ✅ VERIFICAR QUE EL USUARIO EXISTE EN LA DB
+    const user = await User.findById(decoded.userId).select('-password');
+    if (!user) {
+      // ❌ Usuario no existe (ej: fue eliminado de la DB)
+      res.clearCookie('token'); // Limpiar cookie inválida
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // ✅ Pasar usuario completo al request
+    req.user = user;
+    req.userId = user._id;
     next();
   } catch (error) {
     console.error('Error verificando token:', error);
+    res.clearCookie('token');
     return res.status(401).json({ error: 'Token inválido' });
   }
 };
@@ -129,13 +141,12 @@ router.post('/login', async (req, res) => {
 });
 
 // VERIFICAR SESIÓN ACTUAL
+
+
 router.get('/me', verificarToken, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-    res.json({ user });
+    // ✅ Ya no es necesario buscar, `req.user` viene del middleware
+    res.json({ user: req.user });
   } catch (error) {
     console.error('Error en /me:', error);
     res.status(500).json({ error: 'Error interno' });

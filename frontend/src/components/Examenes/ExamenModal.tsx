@@ -46,7 +46,7 @@ export const ExamenModal = ({ visible, fecha, materias, examen, onClose, onGuard
       return;
     }
 
-    const datos = formDataToDatosExamen(formData, fecha);
+    const datos = formDataToDatosExamen(formData, fecha, examen?._id);
     await onGuardar(datos);
     onClose();
   };
