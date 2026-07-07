@@ -22,6 +22,14 @@ declare global {
 const router: Router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambiame';
 
+// ✅ Configuración de cookies para producción (mismo dominio)
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'lax' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000
+};
+
 // Middleware para verificar token desde cookie
 export const verificarToken = async (
   req: Request, 
@@ -39,7 +47,7 @@ export const verificarToken = async (
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
     const user = await User.findById(decoded.userId).select('-password');
     if (!user) {
-      res.clearCookie('token');
+      res.clearCookie('token', cookieOptions);
       res.status(401).json({ error: 'Usuario no encontrado' });
       return;
     }
@@ -48,7 +56,7 @@ export const verificarToken = async (
     next();
   } catch (error: unknown) {
     console.error('Error verificando token:', error);
-    res.clearCookie('token');
+    res.clearCookie('token', cookieOptions);
     res.status(401).json({ error: 'Token inválido' });
   }
 };
@@ -84,12 +92,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       { expiresIn: '7d' }
     );
     
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie('token', token, cookieOptions);
     
     res.status(201).json({ 
       message: 'Usuario creado exitosamente',
@@ -131,12 +134,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       { expiresIn: '7d' }
     );
     
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie('token', token, cookieOptions);
     
     res.json({ 
       message: 'Login exitoso',
@@ -162,11 +160,7 @@ router.get('/me', verificarToken, async (req: Request, res: Response): Promise<v
 
 // LOGOUT
 router.post('/logout', (req: Request, res: Response): void => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
-  });
+  res.clearCookie('token', cookieOptions);
   res.json({ message: 'Logout exitoso' });
 });
 

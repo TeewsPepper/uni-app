@@ -18,7 +18,7 @@ dotenv.config();
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
 
-// CORS
+// CORS - Configurado para producción
 const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
   ? ['https://uni-app-lux3.onrender.com']
   : ['http://localhost:5173'];
@@ -27,7 +27,7 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 // Middlewares
@@ -43,9 +43,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Conectar a MongoDB
 connectDB();
 
-// ===== RUTAS =====
-
-// ✅ RUTA DE HEALTH CHECK (pública)
+// ===== RUTAS API =====
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'OK',
@@ -56,36 +54,37 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
-// Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/materias', materiasRoutes);
 app.use('/api/tareas', tareasRoutes);
 app.use('/api/examenes', examenesRoutes);
 
-// ===== SERVICIO DE ARCHIVOS ESTÁTICOS (SOLO PRODUCCIÓN) =====
+// ===== SERVIDOR DE FRONTEND EN PRODUCCIÓN =====
 if (process.env.NODE_ENV === 'production') {
+  // Servir archivos estáticos
   app.use(express.static(path.join(__dirname, '../public')));
+  
+  // ✅ CORREGIDO: Usar app.use en lugar de app.get
+  app.use((req: Request, res: Response) => {
+    if (req.path.startsWith('/api')) {
+      res.status(404).json({ error: 'API endpoint not found' });
+      return;
+    }
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  });
 }
 
-// ===== MANEJO DE RUTAS =====
-// Las rutas API no encontradas devuelven 404
+// ===== MANEJO DE ERRORES =====
 app.use('/api', (req: Request, res: Response) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// En producción, servir index.html para cualquier otra ruta
-if (process.env.NODE_ENV === 'production') {
-  app.use((req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-  });
-} else {
-  // En desarrollo, 404 para rutas no API
+if (process.env.NODE_ENV !== 'production') {
   app.use((req: Request, res: Response) => {
     res.status(404).json({ error: 'Not found' });
   });
 }
 
-// ===== MIDDLEWARE DE ERRORES =====
 interface IAppError extends Error {
   status?: number;
   statusCode?: number;
@@ -104,7 +103,6 @@ app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// ===== INICIAR SERVIDOR =====
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
