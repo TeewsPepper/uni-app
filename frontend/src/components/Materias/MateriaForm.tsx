@@ -6,10 +6,11 @@ import styles from './MateriaForm.module.css';
 import appStyles from '../../App.module.css';
 
 interface Props {
-  onAgregar: (nombre: string, profesor: string, horarios: Horario[], color: string) => Promise<void>;
+  // ✅ CORREGIDO: El orden debe coincidir con App.tsx
+  onAgregar: (nombre: string, profesor: string, color: string, horarios: Horario[]) => Promise<void>;
 }
 
-// ✨ Constantes fuera del componente (consistente con MateriaEditModal)
+// Constantes fuera del componente
 const COLOR_POR_DEFECTO = '#0e639c';
 
 const COLORES_MATERIA: readonly string[] = [
@@ -24,7 +25,6 @@ export const MateriaForm = ({ onAgregar }: Props) => {
   const [showForm, setShowForm] = useState<boolean>(false);
   const [color, setColor] = useState<string>(COLOR_POR_DEFECTO);
 
-  // ✨ Resetear formulario
   const resetForm = useCallback((): void => {
     setNombre('');
     setProfesor('');
@@ -35,13 +35,13 @@ export const MateriaForm = ({ onAgregar }: Props) => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (nombre.trim()) {
-      await onAgregar(nombre.trim(), profesor.trim(), horarios, color);
+      // ✅ CORREGIDO: Orden correcto (nombre, profesor, color, horarios)
+      await onAgregar(nombre.trim(), profesor.trim(), color, horarios);
       resetForm();
       setShowForm(false);
     }
-  }, [nombre, profesor, horarios, color, onAgregar, resetForm]);
+  }, [nombre, profesor, color, horarios, onAgregar, resetForm]);
 
-  // ✨ Memoizar el preview del color (consistente con MateriaEditModal)
   const colorPreviewStyle = useMemo(() => ({
     backgroundColor: color,
     width: '24px',
@@ -55,7 +55,6 @@ export const MateriaForm = ({ onAgregar }: Props) => {
     setShowForm(false);
   }, [resetForm]);
 
-  // ✨ Botón para mostrar el formulario
   if (!showForm) {
     return (
       <button
@@ -67,7 +66,6 @@ export const MateriaForm = ({ onAgregar }: Props) => {
     );
   }
 
-  // ✨ Formulario
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <input
@@ -101,7 +99,6 @@ export const MateriaForm = ({ onAgregar }: Props) => {
             />
           ))}
         </div>
-        {/* ✨ Preview del color seleccionado */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
           <div style={colorPreviewStyle} />
           <span style={{ fontSize: '12px', color: '#858585' }}>{color}</span>

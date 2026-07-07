@@ -1,16 +1,16 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "src/server.js",
+  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
-    "build": "echo 'No build needed'",
-    "start": "node src/server.js",
-    "dev": "npx nodemon src/server.js"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build:ts": "tsc",
+    "build:frontend": "cd ../frontend && npm install && npm run build",
+    "copy:frontend": "rm -rf public && mkdir -p public && cp -r ../frontend/dist/* public/",
+    "build": "npm run build:ts && npm run build:frontend && npm run copy:frontend",
+    "start": "cross-env NODE_ENV=production node dist/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie": "^1.1.1",
@@ -24,6 +24,16 @@
     "parser": "^0.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.0.0",
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
   }
 }

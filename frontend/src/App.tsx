@@ -1,4 +1,3 @@
-// frontend/src/App.tsx
 import { useState, useEffect, useCallback } from "react";
 import { BookOpen } from "lucide-react";
 import { useMaterias } from "./hooks/useMaterias";
@@ -13,16 +12,21 @@ import { Calendario } from "./components/Calendar/Calendario";
 import { ProximosEventos } from "./components/Calendar/ProximosEventos";
 import { DiaDetalleModal } from "./components/Calendar/DiaDetalleModal";
 import { ExamenModal } from "./components/Examenes/ExamenModal";
-import type { Materia, Horario, Examen } from "./types";
+import type { 
+  Materia, 
+  Horario, 
+  Examen,
+  AuthMeResponse
+} from "./types";
 import styles from "./App.module.css";
 
-// ✨ Constantes para la API
-const API_BASE_URL = 'http://localhost:3001/api';
+// ✅ USAR VARIABLE DE ENTORNO para la API
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // ✨ Función para formatear fecha a ISO sin zona horaria
 const toLocalISODate = (fecha: string): string => {
   const [year, month, day] = fecha.split("-");
-  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
   return date.toISOString();
 };
 
@@ -32,6 +36,13 @@ const extractDateFromDate = (fecha: Date): string => {
   const month = String(fecha.getMonth() + 1).padStart(2, '0');
   const day = String(fecha.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+// ✨ Helper para manejar errores de forma segura
+const getErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  return 'Error desconocido';
 };
 
 function App() {
@@ -70,18 +81,33 @@ function App() {
 
   // ✨ Verificar autenticación al cargar
   useEffect(() => {
-    const verificarAuth = async () => {
+    const verificarAuth = async (): Promise<void> => {
       try {
-        const res = await fetch(`${API_BASE_URL}/auth/me`, { credentials: "include" });
-        const data = await res.json();
+        const res = await fetch(`${API_BASE_URL}/auth/me`, { 
+          credentials: "include" 
+        });
+        
+        if (!res.ok) {
+          setIsAuthenticated(false);
+          return;
+        }
+        
+        const data = await res.json() as AuthMeResponse;
         
         if (data.user) {
           setIsAuthenticated(true);
           setUserEmail(data.user.email);
+          // ✅ Cargar datos después de autenticar
+          await Promise.all([
+            cargarMaterias(),
+            cargarTareas(),
+            recargar()
+          ]);
         } else {
           setIsAuthenticated(false);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
         setIsAuthenticated(false);
       } finally {
         setLoadingAuth(false);
@@ -89,9 +115,9 @@ function App() {
     };
     
     verificarAuth();
-  }, []);
+  }, [cargarMaterias, cargarTareas, recargar]);
 
-  const handleLogout = useCallback(async () => {
+  const handleLogout = useCallback(async (): Promise<void> => {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: "POST",
@@ -107,14 +133,13 @@ function App() {
     materiaId: string,
     titulo: string,
     fecha: string,
-  ) => {
+  ): Promise<void> => {
     try {
       const fechaISO = toLocalISODate(fecha);
       await agregarTarea(titulo, materiaId, fechaISO);
       await cargarTareas();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "No se pudo agregar la tarea";
-      setError(errorMessage);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   }, [agregarTarea, cargarTareas]);
 
@@ -124,7 +149,7 @@ function App() {
     fecha: string,
     hora: string,
     aula: string,
-  ) => {
+  ): Promise<void> => {
     try {
       const fechaISO = toLocalISODate(fecha);
       await agregarExamen({
@@ -137,9 +162,8 @@ function App() {
         nota: null,
       });
       await recargar();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "No se pudo agregar el examen";
-      setError(errorMessage);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   }, [agregarExamen, recargar]);
 
@@ -149,17 +173,16 @@ function App() {
     profesor: string,
     horarios: Horario[],
     color: string,
-  ) => {
+  ): Promise<void> => {
     try {
       await actualizarMateria(id, nombre, profesor, horarios, color);
       await cargarMaterias();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "No se pudo actualizar la materia";
-      setError(errorMessage);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   }, [actualizarMateria, cargarMaterias]);
 
-  const handleEditarExamen = useCallback((examen: Examen) => {
+  const handleEditarExamen = useCallback((examen: Examen): void => {
     setExamenEditando(examen);
     const fechaStr = extractDateFromDate(new Date(examen.fecha));
     setFechaExamenModal(fechaStr);
@@ -167,80 +190,81 @@ function App() {
   }, []);
 
   // ✨ Abrir modal para crear un nuevo examen
-const handleAbrirModalExamen = useCallback((materiaId: string) => {
-  // Crear un objeto examen vacío para la materia
-  const nuevoExamen: Examen = {
-    _id: '', // ← ID vacío indica que es nuevo
-    titulo: '',
-    materiaId: materiaId,
-    fecha: new Date().toISOString(),
-    hora: '',
-    aula: '',
-    contenido: '',
-    nota: null
-  };
-  
-  // Usar la fecha de hoy como fecha predeterminada
-  const fechaStr = new Date().toISOString().split('T')[0];
-  
-  setExamenEditando(nuevoExamen);
-  setFechaExamenModal(fechaStr);
-  setMostrarExamenModal(true);
-}, []);
+  const handleAbrirModalExamen = useCallback((materiaId: string): void => {
+    const nuevoExamen: Examen = {
+      _id: '',
+      titulo: '',
+      materiaId: materiaId,
+      fecha: new Date().toISOString(),
+      hora: '',
+      aula: '',
+      contenido: '',
+      nota: null
+    };
+    
+    const fechaStr = new Date().toISOString().split('T')[0];
+    
+    setExamenEditando(nuevoExamen);
+    setFechaExamenModal(fechaStr);
+    setMostrarExamenModal(true);
+  }, []);
 
-const handleGuardarExamen = useCallback(async (datos: {
-  id?: string; // ← AGREGAR id (opcional)
-  titulo: string;
-  materiaId: string;
-  fecha: string;
-  hora: string;
-  aula: string;
-  contenido: string;
-  nota: number | null;
-}) => {
-  try {
-    if (datos.id) {
-      // ✅ Edición - tiene ID
-      await actualizarExamen(datos.id, datos);
-    } else {
-      // ✅ Creación - no tiene ID
-      const fechaISO = toLocalISODate(datos.fecha);
-      await agregarExamen({
-        ...datos,
-        fecha: fechaISO
-      });
+  const handleGuardarExamen = useCallback(async (datos: {
+    id?: string;
+    titulo: string;
+    materiaId: string;
+    fecha: string;
+    hora: string;
+    aula: string;
+    contenido: string;
+    nota: number | null;
+  }): Promise<void> => {
+    try {
+      if (datos.id) {
+        await actualizarExamen(datos.id, datos);
+      } else {
+        const fechaISO = toLocalISODate(datos.fecha);
+        await agregarExamen({
+          ...datos,
+          fecha: fechaISO
+        });
+      }
+      await recargar();
+      setMostrarExamenModal(false);
+      setExamenEditando(null);
+      setError(null);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
-    await recargar();
-    setMostrarExamenModal(false);
-    setExamenEditando(null);
-    setError(null);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "No se pudo guardar el examen";
-    setError(errorMessage);
-  }
-}, [actualizarExamen, agregarExamen, recargar]); // ← Quitar examenEditando de dependencias
+  }, [actualizarExamen, agregarExamen, recargar]);
 
-  const handleFechaClick = useCallback((fecha: string) => {
+  const handleFechaClick = useCallback((fecha: string): void => {
     setFechaSeleccionada(fecha);
     setMostrarModalDia(true);
   }, []);
 
-  const handleEliminarMateria = useCallback(async (id: string) => {
+  const handleEliminarMateria = useCallback(async (id: string): Promise<void> => {
     try {
       await eliminarMateria(id);
       await cargarMaterias();
       await cargarTareas();
       await recargar();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "No se pudo eliminar la materia";
-      setError(errorMessage);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   }, [eliminarMateria, cargarMaterias, cargarTareas, recargar]);
 
-  const handleLoginSuccess = useCallback(async () => {
+  const handleLoginSuccess = useCallback(async (): Promise<void> => {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, { credentials: "include" });
-      const data = await res.json();
+      const res = await fetch(`${API_BASE_URL}/auth/me`, { 
+        credentials: "include" 
+      });
+      
+      if (!res.ok) {
+        throw new Error('Error al obtener datos del usuario');
+      }
+      
+      const data = await res.json() as AuthMeResponse;
       
       if (data.user) {
         setIsAuthenticated(true);
@@ -251,9 +275,8 @@ const handleGuardarExamen = useCallback(async (datos: {
           recargar()
         ]);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error al cargar los datos";
-      setError(errorMessage);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   }, [cargarMaterias, cargarTareas, recargar]);
 

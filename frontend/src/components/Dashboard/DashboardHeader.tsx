@@ -1,45 +1,32 @@
-// frontend/src/components/Dashboard/DashboardHeader.tsx
-import { memo } from 'react';
-import type { ReactElement } from 'react';
-import styles from "./DashboardHeader.module.css";
-import appStyles from "../../App.module.css";
+import React from 'react';
+import { LogOut, User } from 'lucide-react';
+import styles from './DashboardHeader.module.css';
 
-// ✨ Tipos separados para mejor organización
 interface DashboardHeaderProps {
-  userEmail?: string;
+  userEmail: string;
   onLogout: () => void;
 }
 
-// ✨ Componente memoizado con tipo de return explícito
-export const DashboardHeader = memo(({ userEmail, onLogout }: DashboardHeaderProps): ReactElement => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onLogout }) => {
   return (
-    <div className={styles.header}>
-      <div className={styles.headerTop}>
-        <div className={styles.titleSection}>
-          <h1>📚 UniApp</h1>
-          <p>Organizá tu vida universitaria</p>
+    <header className={styles.header}>
+      <div className={styles.headerContent}>
+        <div className={styles.logo}>
+          <h1>📚 Agenda Universitaria</h1>
+        </div>
+        
+        <div className={styles.userInfo}>
+          <div className={styles.userDetails}>
+            <User size={20} className={styles.userIcon} />
+            <span className={styles.userEmail}>{userEmail}</span>
+          </div>
+          
+          <button onClick={onLogout} className={styles.logoutButton}>
+            <LogOut size={18} />
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </div>
-      <div className={styles.userSection}>
-        {userEmail && (
-          <div className={styles.userInfo}>
-            <span className={styles.userEmail}>
-              👤 {userEmail}
-            </span>
-          </div>
-        )}
-        <button
-          onClick={onLogout}
-          className={`${appStyles.button} ${appStyles.buttonDanger}`}
-          aria-label="Cerrar sesión"
-          title="Cerrar sesión"  // ✨ Tooltip para mejor UX
-        >
-          Cerrar sesión
-        </button>
-      </div>
-    </div>
+    </header>
   );
-});
-
-// ✨ Display name para debugging en React DevTools
-DashboardHeader.displayName = 'DashboardHeader';
+};

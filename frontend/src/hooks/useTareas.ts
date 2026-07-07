@@ -1,130 +1,77 @@
-// frontend/src/hooks/useTareas.ts
-import { useState, useEffect, useCallback } from 'react';
-import type { Tarea } from '../types';
+import { useState, useCallback } from 'react';
+import { tareasService } from '../services/api.js';
+import type { Tarea, CreateTareaData } from '../types';
 
-// ✨ Constante para la API
-const API_BASE_URL = 'http://localhost:3001/api';
-
-// ✨ Tipo para el error de fetch
-interface FetchError {
-  message: string;
-  status?: number;
+interface UseTareasReturn {
+  tareas: Tarea[];
+  cargando: boolean;
+  cargarTareas: (materiaId?: string) => Promise<void>;
+  agregarTarea: (titulo: string, materiaId: string, fechaEntrega: string, prioridad?: 'baja' | 'media' | 'alta') => Promise<Tarea>;
+  completarTarea: (id: string) => Promise<Tarea>;
+  eliminarTarea: (id: string) => Promise<void>;
 }
 
-// ✨ Helper para manejar errores
-const handleFetchError = (error: unknown): FetchError => {
-  if (error instanceof Error) {
-    return { message: error.message };
-  }
-  return { message: 'Error desconocido' };
-};
-
-const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  return fetch(url, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
-  });
-};
-
-export const useTareas = () => {
+export const useTareas = (): UseTareasReturn => {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [cargando, setCargando] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const cargarTareas = useCallback(async (): Promise<void> => {
+  const cargarTareas = useCallback(async (materiaId?: string): Promise<void> => {
     setCargando(true);
-    setError(null);
     try {
-      const res = await fetchWithAuth(`${API_BASE_URL}/tareas`);
-      if (!res.ok) throw new Error(`Error al cargar tareas: ${res.status}`);
-      const data = await res.json() as Tarea[];
+      const data = await tareasService.getAll(materiaId);
       setTareas(data);
-    } catch (err) {
-      const { message } = handleFetchError(err);
-      setError(message);
-      console.error('Error cargando tareas:', err);
+    } catch (error) {
+      console.error('Error cargando tareas:', error);
+      throw error;
     } finally {
       setCargando(false);
     }
   }, []);
 
   const agregarTarea = useCallback(async (
-    titulo: string, 
-    materiaId: string, 
-    fechaEntrega: string
+    titulo: string,
+    materiaId: string,
+    fechaEntrega: string,
+    prioridad: 'baja' | 'media' | 'alta' = 'media'
   ): Promise<Tarea> => {
-    setError(null);
     try {
-      const res = await fetchWithAuth(`${API_BASE_URL}/tareas`, {
-        method: 'POST',
-        body: JSON.stringify({ titulo, materiaId, fechaEntrega })
-      });
-      
-      if (!res.ok) throw new Error(`Error al agregar tarea: ${res.status}`);
-      
-      const nuevaTarea = await res.json() as Tarea;
+      const data: CreateTareaData = { titulo, materiaId, fechaEntrega, prioridad };
+      const nuevaTarea = await tareasService.create(data);
       setTareas(prev => [...prev, nuevaTarea]);
       return nuevaTarea;
-    } catch (err) {
-      const { message } = handleFetchError(err);
-      setError(message);
-      console.error('Error agregando tarea:', err);
-      throw err;
+    } catch (error) {
+      console.error('Error agregando tarea:', error);
+      throw error;
     }
   }, []);
 
-  const completarTarea = useCallback(async (id: string): Promise<void> => {
-    setError(null);
+  const completarTarea = useCallback(async (id: string): Promise<Tarea> => {
     try {
-      const res = await fetchWithAuth(`${API_BASE_URL}/tareas/${id}/completar`, {
-        method: 'PATCH'
-      });
-      
-      if (!res.ok) throw new Error(`Error al completar tarea: ${res.status}`);
-      
-      setTareas(prev => prev.map(t => 
-        t._id === id ? { ...t, completada: true } : t
-      ));
-    } catch (err) {
-      const { message } = handleFetchError(err);
-      setError(message);
-      console.error('Error completando tarea:', err);
+      const tareaActualizada = await tareasService.completar(id);
+      setTareas(prev => prev.map(t => t._id === id ? tareaActualizada : t));
+      return tareaActualizada;
+    } catch (error) {
+      console.error('Error completando tarea:', error);
+      throw error;
     }
   }, []);
 
   const eliminarTarea = useCallback(async (id: string): Promise<void> => {
-    setError(null);
     try {
-      const res = await fetchWithAuth(`${API_BASE_URL}/tareas/${id}`, {
-        method: 'DELETE'
-      });
-      
-      if (!res.ok) throw new Error(`Error al eliminar tarea: ${res.status}`);
-      
+      await tareasService.delete(id);
       setTareas(prev => prev.filter(t => t._id !== id));
-    } catch (err) {
-      const { message } = handleFetchError(err);
-      setError(message);
-      console.error('Error eliminando tarea:', err);
+    } catch (error) {
+      console.error('Error eliminando tarea:', error);
+      throw error;
     }
   }, []);
 
-  // Cargar tareas al montar el hook
-  useEffect(() => {
-    cargarTareas();
-  }, [cargarTareas]);
-
-  return { 
-    tareas, 
+  return {
+    tareas,
     cargando,
-    error,
-    cargarTareas, 
-    agregarTarea, 
-    completarTarea, 
-    eliminarTarea 
+    cargarTareas,
+    agregarTarea,
+    completarTarea,
+    eliminarTarea,
   };
 };

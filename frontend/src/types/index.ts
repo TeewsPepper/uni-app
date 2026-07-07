@@ -13,6 +13,9 @@ export interface Materia {
   profesor: string;
   color: string;
   horarios: Horario[];
+  usuarioId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Tarea {
@@ -23,30 +26,35 @@ export interface Tarea {
   fechaEntrega: string;
   prioridad: 'baja' | 'media' | 'alta';
   completada: boolean;
+  usuarioId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// ✨ Mejora: Tipo unión más específica en lugar de any implícito
-export type MateriaInfo = {
+export interface MateriaPoblada {
   _id: string;
   nombre: string;
-  color?: string;
-};
+  color: string;
+}
+
+export type MateriaId = string | MateriaPoblada;
 
 export interface Examen {
   _id: string;
   titulo: string;
-  // ✨ Tipo explícito para materiaId (reemplaza unión genérica)
-  materiaId: string | { _id: string; nombre: string };
+  materiaId: MateriaId;
   fecha: string;
   hora: string;
   aula: string;
   contenido: string;
   nota: number | null;
+  usuarioId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// ✨ Tipo auxiliar para cuando necesitas la materia poblada
 export type ExamenConMateriaPoblada = Omit<Examen, 'materiaId'> & {
-  materiaId: MateriaInfo;
+  materiaId: MateriaPoblada;
 };
 
 export interface MateriaStats {
@@ -58,23 +66,92 @@ export interface MateriaStats {
 }
 
 // ============================================
-// ✨ TYPE GUARDS (para narrowing seguro)
+// TYPE GUARDS
 // ============================================
 
-/**
- * Type guard para verificar si materiaId está poblada
- */
 export const isMateriaPoblada = (
-  materia: string | MateriaInfo
-): materia is MateriaInfo => {
-  return typeof materia !== 'string' && 'nombre' in materia;
+  materia: MateriaId
+): materia is MateriaPoblada => {
+  return typeof materia !== 'string' && 'nombre' in materia && 'color' in materia;
 };
 
-/**
- * Type guard para verificar si un examen tiene materia poblada
- */
 export const isExamenConMateriaPoblada = (
   examen: Examen
 ): examen is ExamenConMateriaPoblada => {
   return isMateriaPoblada(examen.materiaId);
 };
+
+// ============================================
+// TIPOS PARA LA API
+// ============================================
+
+export interface ApiResponse<T = unknown> {
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
+export interface AuthResponse {
+  user: {
+    id: string;
+    email: string;
+  };
+  message?: string;
+}
+
+export interface AuthMeResponse {
+  user: {
+    id: string;
+    email: string;
+  } | null;
+}
+
+export interface ErrorResponse {
+  error: string;
+  message?: string;
+}
+
+// ============================================
+// TIPOS PARA CREACIÓN/ACTUALIZACIÓN
+// ============================================
+
+export interface CreateMateriaData {
+  nombre: string;
+  profesor?: string;
+  color?: string;
+  horarios?: Horario[];
+}
+
+// ✅ AGREGADO: UpdateMateriaData
+export interface UpdateMateriaData extends Partial<CreateMateriaData> {
+  id: string;
+}
+
+export interface CreateTareaData {
+  titulo: string;
+  descripcion?: string;
+  materiaId: string;
+  fechaEntrega: string;
+  prioridad?: 'baja' | 'media' | 'alta';
+}
+
+// ✅ AGREGADO: UpdateTareaData
+export interface UpdateTareaData extends Partial<CreateTareaData> {
+  id: string;
+  completada?: boolean;
+}
+
+export interface CreateExamenData {
+  titulo: string;
+  materiaId: string;
+  fecha: string;
+  hora?: string;
+  aula?: string;
+  contenido?: string;
+  nota?: number | null;
+}
+
+// ✅ AGREGADO: UpdateExamenData
+export interface UpdateExamenData extends Partial<CreateExamenData> {
+  id: string;
+}
