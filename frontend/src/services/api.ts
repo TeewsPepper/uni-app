@@ -11,6 +11,9 @@ import type {
 } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+console.log('🔍 MODE:', import.meta.env.MODE);
+console.log('🔍 VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('🔍 API_URL final:', API_URL);
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
