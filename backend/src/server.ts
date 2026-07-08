@@ -1,108 +1,70 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import authRoutes from './routes/auth.js';
-import materiasRoutes from './routes/materias.js';
-import tareasRoutes from './routes/tareas.js';
-import examenesRoutes from './routes/examenes.js';
-import connectDB from './config/db.js';
+import cookieParser from 'cookie-parser';
 
+// Importar rutas
+import authRoutes from './routes/auth.js';
+
+// Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Cargar variables de entorno
 dotenv.config();
 
-const app: Express = express();
-const PORT: number = parseInt(process.env.PORT || '3001', 10);
+const app = express();
 
-// CORS - Configurado para producción
-const allowedOrigins: string[] = process.env.NODE_ENV === 'production'
-  ? ['https://uni-app-lux3.onrender.com']
-  : ['http://localhost:5173'];
-
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-}));
-
-// Middlewares
+// 🔧 Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
-// Logging
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
+// Configurar CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://uni-app-lux3.onrender.com' 
+    : 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Conectar a MongoDB
-connectDB();
+// 🗄️ Conectar a MongoDB
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/agenda-universitaria';
 
-// ===== RUTAS API =====
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({
-    status: 'OK',
-    message: 'Servidor funcionando correctamente',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    mongodb: 'connected'
-  });
-});
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch((err: Error) => console.error('❌ MongoDB connection error:', err));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/materias', materiasRoutes);
-app.use('/api/tareas', tareasRoutes);
-app.use('/api/examenes', examenesRoutes);
-
-// ===== SERVIDOR DE FRONTEND EN PRODUCCIÓN =====
+// 📦 Servir archivos estáticos del frontend (en producción)
 if (process.env.NODE_ENV === 'production') {
-  // ✅ Servir archivos estáticos desde dist/ (frontend compilado)
   app.use(express.static(path.join(__dirname, '../dist')));
   
-  app.use((req: Request, res: Response) => {
-    if (req.path.startsWith('/api')) {
-      res.status(404).json({ error: 'API endpoint not found' });
-      return;
+  // Para SPA: manejar todas las rutas que no sean API
+  app.get('*', (req: Request, res: Response) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, '../dist/index.html'));
     }
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
   });
 }
 
-// ===== MANEJO DE ERRORES =====
-app.use('/api', (req: Request, res: Response) => {
-  res.status(404).json({ error: 'API endpoint not found' });
+// 🛣️ Rutas de la API
+app.use('/api/auth', authRoutes);
+
+// Ejemplo de ruta de prueba
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({ status: 'OK', environment: process.env.NODE_ENV });
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req: Request, res: Response) => {
-    res.status(404).json({ error: 'Not found' });
-  });
-}
-
-interface IAppError extends Error {
-  status?: number;
-  statusCode?: number;
-}
-
-app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err.stack);
-  
-  const statusCode = err.statusCode || err.status || 500;
-  const message = process.env.NODE_ENV === 'development' 
-    ? err.message 
-    : 'Something went wrong!';
-  
-  res.status(statusCode).json({ 
-    error: message
-  });
-});
+// 🚀 Iniciar servidor
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+export default app;

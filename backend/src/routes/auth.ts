@@ -22,11 +22,13 @@ declare global {
 const router: Router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambiame';
 
-// ✅ Configuración de cookies para producción (mismo dominio)
+// ✅ Configuración de cookies CORREGIDA (con tipos explícitos)
+const isProduction = process.env.NODE_ENV === 'production';
+
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: 'lax' as const,
+  secure: isProduction,
+  sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax' | 'strict',
   maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
