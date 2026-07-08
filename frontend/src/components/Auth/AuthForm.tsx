@@ -1,6 +1,7 @@
 // frontend/src/components/Auth/AuthForm.tsx
 import { useState } from 'react';
-import styles from './AuthForm.module.css'; // ✨ Importar CSS Module local
+import { API_URL } from '../../services/api';
+import styles from './AuthForm.module.css';
 
 // ✨ Tipos para las respuestas de la API
 interface AuthResponse {
@@ -16,7 +17,9 @@ interface Props {
   onLogin: () => void;
 }
 
-const API_BASE_URL = 'http://localhost:3001/api/auth';
+// ✅ CORREGIDO: Usa variable de entorno
+const API_BASE_URL = `${API_URL}/auth`;
+
 const ENDPOINTS = {
   login: `${API_BASE_URL}/login`,
   register: `${API_BASE_URL}/register`
