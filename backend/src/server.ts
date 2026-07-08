@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser';
 
 // Importar rutas
 import authRoutes from './routes/auth.js';
+import materiasRoutes from './routes/materias.js';  // ✅ AGREGAR
+import tareasRoutes from './routes/tareas.js';      // ✅ AGREGAR
+import examenesRoutes from './routes/examenes.js';  // ✅ AGREGAR
 
 // Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -40,7 +43,6 @@ mongoose.connect(MONGODB_URI)
   .catch((err: Error) => console.error('❌ MongoDB connection error:', err));
 
 // 📦 Servir archivos estáticos del frontend (en producción)
-// 📦 Servir archivos estáticos del frontend (en producción)
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
   
@@ -57,6 +59,9 @@ if (process.env.NODE_ENV === 'production') {
 
 // 🛣️ Rutas de la API
 app.use('/api/auth', authRoutes);
+app.use('/api/materias', materiasRoutes);   // ✅ AGREGAR
+app.use('/api/tareas', tareasRoutes);       // ✅ AGREGAR
+app.use('/api/examenes', examenesRoutes);   // ✅ AGREGAR
 
 // Ejemplo de ruta de prueba
 app.get('/api/health', (req: Request, res: Response) => {
