@@ -40,11 +40,12 @@ mongoose.connect(MONGODB_URI)
   .catch((err: Error) => console.error('❌ MongoDB connection error:', err));
 
 // 📦 Servir archivos estáticos del frontend (en producción)
+// 📦 Servir archivos estáticos del frontend (en producción)
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
   
-  // Para SPA: manejar todas las rutas que no sean API
-  app.get('/:path(.*)?', (req: Request, res: Response) => {
+  // ✅ Usar app.all para capturar todas las rutas
+  app.all('*', (req: Request, res: Response) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(__dirname, '../dist/index.html'));
     }
