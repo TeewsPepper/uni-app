@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -40,13 +40,17 @@ mongoose.connect(MONGODB_URI)
   .catch((err: Error) => console.error('❌ MongoDB connection error:', err));
 
 // 📦 Servir archivos estáticos del frontend (en producción)
+// 📦 Servir archivos estáticos del frontend (en producción)
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
   
-  // ✅ SOLUCIÓN PARA EXPRESS 5: usar parámetro con regex
-  app.get('/:path(.*)?', (req: Request, res: Response) => {
+  // ✅ Middleware que captura TODAS las rutas (sin usar path-to-regexp)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // Si la ruta no empieza con /api y no es un archivo estático
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(__dirname, '../dist/index.html'));
+    } else {
+      next();
     }
   });
 }
