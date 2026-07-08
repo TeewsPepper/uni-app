@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { API_URL } from '../../services/api';
 import styles from './AuthForm.module.css';
 
-// ✨ Tipos para las respuestas de la API
+// ✅ Definimos el tipo de la respuesta (¡ESTO ES BUENO!)
 interface AuthResponse {
   error?: string;
   message?: string;
@@ -17,7 +17,7 @@ interface Props {
   onLogin: () => void;
 }
 
-// ✅ CORREGIDO: Usa variable de entorno
+// ✅ CORRECTO - Usa API_URL importado
 const API_BASE_URL = `${API_URL}/auth`;
 
 const ENDPOINTS = {
@@ -38,6 +38,9 @@ export const AuthForm = ({ onLogin }: Props) => {
     setLoading(true);
 
     const endpoint = isLogin ? ENDPOINTS.login : ENDPOINTS.register;
+    
+    console.log('🔍 Enviando petición a:', endpoint);
+    console.log('🔍 Datos:', { email, password: '***' });
 
     try {
       const res = await fetch(endpoint, {
@@ -47,18 +50,37 @@ export const AuthForm = ({ onLogin }: Props) => {
         body: JSON.stringify({ email, password })
       });
 
+      console.log('📨 Respuesta del servidor:', {
+        status: res.status,
+        ok: res.ok,
+        statusText: res.statusText
+      });
+
+      // ✅ TIPAMOS LA RESPUESTA CORRECTAMENTE
       const data = await res.json() as AuthResponse;
+      console.log('📦 Datos recibidos:', data);
 
       if (res.ok) {
+        console.log('✅ Éxito:', data);
+        
+        if (data.user) {
+          console.log('👤 Usuario autenticado:', data.user.email);
+        } else {
+          console.warn('⚠️ Respuesta ok pero sin usuario');
+        }
+        
         onLogin();
-      } else {
-        setError(data.error || 'Error de autenticación');
+        return;
       }
+
+      // ✅ ACCEDEMOS A LAS PROPIEDADES CON SEGURIDAD
+      const errorMsg = data.error || data.message || 'Error de autenticación';
+      console.error('❌ Error del servidor:', errorMsg);
+      setError(errorMsg);
+
     } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : 'Error de conexión con el servidor';
-      setError(errorMessage);
+      console.error('❌ Error de red:', err);
+      setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
     }
