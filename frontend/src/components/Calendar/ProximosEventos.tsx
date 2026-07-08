@@ -155,7 +155,7 @@ export const ProximosEventos = ({
 
   return (
     <div className={styles.proximosEventos}>
-      <h3 className={styles.title}>📅 Próximos días</h3>
+      <h3 className={styles.title}>📅 Mi Semana</h3>
       <div className={styles.diasGrid}>
         {eventosPorDia.map((dia, idx) => (
           <div

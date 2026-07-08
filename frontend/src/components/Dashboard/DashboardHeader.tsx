@@ -12,7 +12,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onL
     <header className={styles.header}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
-          <h1>📚 Agenda Universitaria</h1>
+          <h1>📚 Uni-App</h1>
         </div>
         
         <div className={styles.userInfo}>
