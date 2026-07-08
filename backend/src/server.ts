@@ -44,11 +44,11 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
   
   // Para SPA: manejar todas las rutas que no sean API
-  app.get('/*', (req: Request, res: Response) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  }
-});
+  app.get('/:path(.*)?', (req: Request, res: Response) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, '../dist/index.html'));
+    }
+  });
 }
 
 // 🛣️ Rutas de la API
