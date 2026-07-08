@@ -40,12 +40,11 @@ mongoose.connect(MONGODB_URI)
   .catch((err: Error) => console.error('❌ MongoDB connection error:', err));
 
 // 📦 Servir archivos estáticos del frontend (en producción)
-// 📦 Servir archivos estáticos del frontend (en producción)
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
   
-  // ✅ Usar app.all para capturar todas las rutas
-  app.all('*', (req: Request, res: Response) => {
+  // ✅ SOLUCIÓN PARA EXPRESS 5: usar parámetro con regex
+  app.get('/:path(.*)?', (req: Request, res: Response) => {
     if (!req.path.startsWith('/api')) {
       res.sendFile(path.join(__dirname, '../dist/index.html'));
     }
