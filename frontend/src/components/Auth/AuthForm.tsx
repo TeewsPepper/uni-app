@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { API_URL } from '../../services/api';
 import styles from './AuthForm.module.css';
 
-// ✅ Definimos el tipo de la respuesta (¡ESTO ES BUENO!)
+// ✅ Definimos el tipo de la respuesta 
 interface AuthResponse {
   error?: string;
   message?: string;
@@ -17,13 +17,31 @@ interface Props {
   onLogin: () => void;
 }
 
-// ✅ CORRECTO - Usa API_URL importado
+// ✅ Usa API_URL importado
 const API_BASE_URL = `${API_URL}/auth`;
 
 const ENDPOINTS = {
   login: `${API_BASE_URL}/login`,
   register: `${API_BASE_URL}/register`
 } as const;
+
+// 🔧 Logger condicional con tipado correcto
+const isDevelopment = import.meta.env.MODE === 'development';
+
+const logger = {
+  log: (...args: unknown[]) => {
+    if (isDevelopment) console.log(...args);
+  },
+  error: (...args: unknown[]) => {
+    if (isDevelopment) console.error(...args);
+  },
+  warn: (...args: unknown[]) => {
+    if (isDevelopment) console.warn(...args);
+  },
+  info: (...args: unknown[]) => {
+    if (isDevelopment) console.info(...args);
+  }
+};
 
 export const AuthForm = ({ onLogin }: Props) => {
   const [email, setEmail] = useState<string>('');
@@ -39,8 +57,8 @@ export const AuthForm = ({ onLogin }: Props) => {
 
     const endpoint = isLogin ? ENDPOINTS.login : ENDPOINTS.register;
     
-    console.log('🔍 Enviando petición a:', endpoint);
-    console.log('🔍 Datos:', { email, password: '***' });
+    logger.log('🔍 Enviando petición a:', endpoint);
+    logger.log('🔍 Datos:', { email, password: '***' });
 
     try {
       const res = await fetch(endpoint, {
@@ -50,36 +68,34 @@ export const AuthForm = ({ onLogin }: Props) => {
         body: JSON.stringify({ email, password })
       });
 
-      console.log('📨 Respuesta del servidor:', {
+      logger.log('📨 Respuesta del servidor:', {
         status: res.status,
         ok: res.ok,
         statusText: res.statusText
       });
 
-      // ✅ TIPAMOS LA RESPUESTA CORRECTAMENTE
       const data = await res.json() as AuthResponse;
-      console.log('📦 Datos recibidos:', data);
+      logger.log('📦 Datos recibidos:', data);
 
       if (res.ok) {
-        console.log('✅ Éxito:', data);
+        logger.log('✅ Éxito:', data);
         
         if (data.user) {
-          console.log('👤 Usuario autenticado:', data.user.email);
+          logger.log('👤 Usuario autenticado:', data.user.email);
         } else {
-          console.warn('⚠️ Respuesta ok pero sin usuario');
+          logger.warn('⚠️ Respuesta ok pero sin usuario');
         }
         
         onLogin();
         return;
       }
 
-      // ✅ ACCEDEMOS A LAS PROPIEDADES CON SEGURIDAD
       const errorMsg = data.error || data.message || 'Error de autenticación';
-      console.error('❌ Error del servidor:', errorMsg);
+      logger.error('❌ Error del servidor:', errorMsg);
       setError(errorMsg);
 
     } catch (err) {
-      console.error('❌ Error de red:', err);
+      logger.error('❌ Error de red:', err);
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
@@ -90,8 +106,8 @@ export const AuthForm = ({ onLogin }: Props) => {
     <div className={styles.authContainer}>
       <div className={styles.authCard}>
         <div className={styles.authHeader}>
-          <h1>📚 Agenda Universitaria</h1>
-          <p>Organizá tus materias, tareas, exámenes, calificaciones y más</p>
+          <h1>📚 UniApp</h1>
+          <p>Organizá tus materias, tareas, parciales, calificaciones y más</p>
         </div>
 
         <h2 className={styles.authTitle}>
@@ -107,6 +123,7 @@ export const AuthForm = ({ onLogin }: Props) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className={styles.input}
+              autoComplete="email"
             />
           </div>
 
@@ -119,11 +136,12 @@ export const AuthForm = ({ onLogin }: Props) => {
               required
               minLength={6}
               className={styles.input}
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
             />
           </div>
 
           {error && (
-            <div className={styles.errorMessage}>
+            <div className={styles.errorMessage} role="alert">
               {error}
             </div>
           )}
@@ -138,7 +156,10 @@ export const AuthForm = ({ onLogin }: Props) => {
 
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+            }}
             className={styles.toggleButton}
           >
             {isLogin 
