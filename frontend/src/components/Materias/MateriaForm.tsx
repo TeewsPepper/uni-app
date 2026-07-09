@@ -35,7 +35,6 @@ export const MateriaForm = ({ onAgregar }: Props) => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (nombre.trim()) {
-      // ✅ CORREGIDO: Orden correcto (nombre, profesor, color, horarios)
       await onAgregar(nombre.trim(), profesor.trim(), color, horarios);
       resetForm();
       setShowForm(false);
@@ -60,6 +59,7 @@ export const MateriaForm = ({ onAgregar }: Props) => {
       <button
         onClick={() => setShowForm(true)}
         className={`${appStyles.button} ${appStyles.buttonPrimary}`}
+        id="add-materia-button"
       >
         + Agregar Materia
       </button>

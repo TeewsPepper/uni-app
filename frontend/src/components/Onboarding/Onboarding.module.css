@@ -1,0 +1,693 @@
+/* ============================================
+   Onboarding.module.css
+   Tema oscuro estilo VS Code - Compatible con App.module.css
+   ============================================ */
+
+/* ---------- VARIABLES GLOBALES ---------- */
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-card: #2d2d2d;
+  --bg-hover: #3d3d3d;
+  --text-primary: #d4d4d4;
+  --text-secondary: #b0b0b0;
+  --text-muted: #8b8b8b;
+  --text-light: #cccccc;
+  --border-color: #3c3c3c;
+  --accent-primary: #007acc;
+  --accent-secondary: #00b4d8;
+  --accent-purple: #7c3aed;
+  --shadow-color: rgba(0, 0, 0, 0.8);
+  --transition-speed: 0.3s;
+}
+
+/* ============================================
+   OVERLAY Y BACKDROP
+   ============================================ */
+
+.overlayContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  pointer-events: auto;
+  z-index: 998;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: backdrop-fade-in 0.4s ease;
+}
+
+@keyframes backdrop-fade-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+/* ============================================
+   HIGHLIGHT - Resaltado de elementos
+   ============================================ */
+
+.highlight {
+  position: fixed;
+  border-radius: 12px;
+  pointer-events: none;
+  box-shadow: 
+    0 0 0 4px var(--accent-primary),
+    0 0 30px rgba(0, 122, 204, 0.3),
+    inset 0 0 30px rgba(0, 122, 204, 0.05);
+  animation: highlight-pulse 2s ease-in-out infinite;
+  z-index: 999;
+  background: rgba(0, 122, 204, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes highlight-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 4px var(--accent-primary),
+      0 0 30px rgba(0, 122, 204, 0.3),
+      inset 0 0 30px rgba(0, 122, 204, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 6px var(--accent-primary),
+      0 0 50px rgba(0, 122, 204, 0.5),
+      inset 0 0 40px rgba(0, 122, 204, 0.1);
+  }
+}
+
+/* Variante para elementos interactivos */
+.highlightInteractive {
+  animation: highlight-interactive 2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes highlight-interactive {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 4px var(--accent-secondary),
+      0 0 30px rgba(0, 180, 216, 0.3),
+      inset 0 0 30px rgba(0, 180, 216, 0.05);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 6px var(--accent-secondary),
+      0 0 50px rgba(0, 180, 216, 0.5),
+      inset 0 0 40px rgba(0, 180, 216, 0.1);
+    transform: scale(1.01);
+  }
+}
+
+/* ============================================
+   CARD PRINCIPAL DEL ONBOARDING
+   ============================================ */
+
+.onboardingCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 28px;
+  min-width: 340px;
+  max-width: 480px;
+  pointer-events: auto;
+  box-shadow: 0 20px 60px var(--shadow-color);
+  position: relative;
+  overflow: hidden;
+  animation: card-appear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Barra superior decorativa */
+.onboardingCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary),
+    var(--accent-secondary),
+    var(--accent-purple),
+    var(--accent-secondary),
+    var(--accent-primary)
+  );
+  background-size: 300% 100%;
+  animation: gradient-slide 4s ease-in-out infinite;
+}
+
+@keyframes gradient-slide {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ============================================
+   PROGRESO
+   ============================================ */
+
+.progressContainer {
+  margin-bottom: 20px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-card);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+  position: relative;
+}
+
+/* Efecto de brillo en la barra de progreso */
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   BOTÓN SKIP (en la barra de progreso)
+   ============================================ */
+
+.skipButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: all var(--transition-speed) ease;
+  font-family: inherit;
+  position: relative;
+}
+
+.skipButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.skipButton:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   CONTENIDO DEL PASO
+   ============================================ */
+
+.stepContainer {
+  animation: step-fade-slide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes step-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepTitle {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+}
+
+.stepTitle .emoji {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.stepDescription {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 400;
+}
+
+.stepImage {
+  margin: 4px 0 8px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
+.stepImage img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* ============================================
+   ACCIONES DEL PASO (Botones)
+   ============================================ */
+
+.stepActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.navigationButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+
+.button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  min-width: 100px;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.button:active {
+  transform: scale(0.96);
+}
+
+/* Botón Anterior */
+.prevButton {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.prevButton:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+/* Botón Siguiente / Empezar */
+.nextButton {
+  background: var(--accent-primary);
+  color: white;
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 4px 12px rgba(0, 122, 204, 0.2);
+}
+
+.nextButton:hover {
+  background: #005999;
+  border-color: #005999;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 122, 204, 0.3);
+}
+
+.nextButton:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Efecto de onda en el botón principal */
+.nextButton::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.nextButton:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Botón Saltar (al pie) */
+.skipButtonStep {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 6px;
+  transition: all var(--transition-speed) ease;
+  text-align: center;
+  font-family: inherit;
+  border-radius: 4px;
+}
+
+.skipButtonStep:hover {
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+.skipButtonStep:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   ICONOS Y DECORACIONES
+   ============================================ */
+
+.iconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  margin-bottom: 8px;
+}
+
+.iconWrapper svg {
+  width: 24px;
+  height: 24px;
+  color: var(--accent-primary);
+}
+
+/* Badge de paso actual */
+.stepBadge {
+  display: inline-block;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+/* Tablets y móviles grandes */
+@media (max-width: 768px) {
+  .onboardingCard {
+    min-width: unset;
+    max-width: 92vw;
+    padding: 24px;
+    margin: 0 16px;
+  }
+
+  .stepTitle {
+    font-size: 22px;
+  }
+
+  .stepDescription {
+    font-size: 14px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 640px) {
+  .onboardingCard {
+    padding: 20px;
+    max-width: 94vw;
+    margin: 0 12px;
+    border-radius: 12px;
+  }
+
+  .stepTitle {
+    font-size: 20px;
+  }
+
+  .stepDescription {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .navigationButtons {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .button {
+    width: 100%;
+    padding: 12px 20px;
+    min-width: unset;
+    font-size: 14px;
+    min-height: 48px;
+  }
+
+  .prevButton {
+    order: 2;
+  }
+
+  .nextButton {
+    order: 1;
+  }
+
+  .skipButtonStep {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .progressInfo {
+    font-size: 12px;
+  }
+
+  .skipButton {
+    font-size: 12px;
+    padding: 2px 10px;
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 380px) {
+  .onboardingCard {
+    padding: 16px;
+    max-width: 96vw;
+    margin: 0 8px;
+  }
+
+  .stepTitle {
+    font-size: 18px;
+  }
+
+  .stepDescription {
+    font-size: 13px;
+  }
+
+  .button {
+    padding: 10px 16px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+}
+
+/* ============================================
+   ANIMACIONES ADICIONALES
+   ============================================ */
+
+/* Animación de entrada para el highlight */
+.highlight {
+  animation: highlight-appear 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+             highlight-pulse 2s ease-in-out infinite 0.5s;
+}
+
+@keyframes highlight-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Efecto de partículas (opcional, para pasos especiales) */
+.sparkle {
+  position: absolute;
+  pointer-events: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  animation: sparkle-float 3s ease-in-out infinite;
+}
+
+@keyframes sparkle-float {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1);
+  }
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+
+/* Focus visible para navegación por teclado */
+.button:focus-visible,
+.skipButton:focus-visible,
+.skipButtonStep:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Alto contraste para textos */
+@media (prefers-contrast: high) {
+  .stepDescription {
+    color: var(--text-primary);
+  }
+  
+  .progressInfo {
+    color: var(--text-secondary);
+  }
+  
+  .skipButton {
+    color: var(--text-secondary);
+  }
+}
+
+/* ============================================
+   MODO OSCURO / CLARO (opcional)
+   ============================================ */
+
+/* Si tu app soporta tema claro */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #f3f4f6;
+    --bg-secondary: #ffffff;
+    --bg-card: #e5e7eb;
+    --bg-hover: #d1d5db;
+    --text-primary: #1f2937;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --border-color: #d1d5db;
+    --shadow-color: rgba(0, 0, 0, 0.15);
+  }
+  
+  .backdrop {
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  .onboardingCard {
+    box-shadow: 0 20px 60px var(--shadow-color);
+  }
+}

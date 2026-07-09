@@ -13,6 +13,7 @@ interface AuthContextType {
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  resetOnboarding?: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

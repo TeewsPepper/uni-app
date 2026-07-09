@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onLogout }) => {
   return (
-    <header className={styles.header}>
+    <header id="dashboard-header" className={styles.header}>
       <div className={styles.headerContent}>
         <div className={styles.logo}>
           <h1>📚 Uni-App</h1>

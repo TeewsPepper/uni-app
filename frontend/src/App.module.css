@@ -79,7 +79,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-top: 24px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -465,4 +466,73 @@ h2, h3, h4 {
 
 label {
   color: #cccccc;
+}
+
+/* ============================================
+   ONBOARDING - IDs para resaltar
+   ============================================ */
+
+/* ID para el header del dashboard */
+#dashboard-header {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ID para próximos eventos */
+#proximos-eventos {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ID para el contenedor del calendario */
+#calendario-container {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ID para el botón de agregar materia */
+#add-materia-button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Pequeño indicador para el highlight del onboarding */
+#add-materia-button:focus-visible {
+  outline: 2px solid #007acc;
+  outline-offset: 2px;
+}
+
+/* Asegurar que el onboarding no bloquee interacciones */
+.onboarding-active {
+  position: relative;
+}
+
+/* Los elementos resaltados deben mantener su interactividad */
+.onboarding-highlight-target {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ajuste para que el backdrop no afecte a los modales existentes */
+.modalOverlay {
+  z-index: 1000 !important; /* Asegurar que los modales estén por encima */
+}
+
+/* El onboarding debe estar por debajo de los modales */
+.onboarding-tour {
+  z-index: 999 !important;
+}
+
+/* Mejorar visibilidad de botones durante el onboarding */
+#add-materia-button.onboarding-highlight {
+  animation: onboarding-pulse 2s ease-in-out infinite;
+}
+
+@keyframes onboarding-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 122, 204, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 122, 204, 0);
+  }
 }
