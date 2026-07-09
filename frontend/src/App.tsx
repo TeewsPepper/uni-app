@@ -301,6 +301,12 @@ function App() {
         onEditarExamen={handleEditarExamen}
         onDiaClick={handleFechaClick}
       />
+      <Calendario
+        tareas={tareas}
+        examenes={examenes}
+        materias={materias}
+        onFechaClick={handleFechaClick}
+      />
       
       <div>
         <div className={styles.sectionHeader}>
@@ -331,12 +337,7 @@ function App() {
         </div>
       </div>
       
-      <Calendario
-        tareas={tareas}
-        examenes={examenes}
-        materias={materias}
-        onFechaClick={handleFechaClick}
-      />
+      
 
       <MateriaEditModal
         visible={!!materiaEditando}

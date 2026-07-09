@@ -1,0 +1,186 @@
+/* Calendario.module.css - Tema oscuro estilo VS Code */
+
+.calendarioWrapper {
+  margin-top: 24px;
+}
+
+.toggleButton {
+  width: 100%;
+  background: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  color: #9cdcfe;
+  font-family: 'Segoe UI', 'SF Mono', monospace;
+}
+
+.toggleButton:hover {
+  background: #2d2d2d;
+  border-color: #0e639c;
+  transform: translateY(-1px);
+}
+
+.calendarioContainer {
+  background: #252526;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+  border: 1px solid #3c3c3c;
+}
+
+/* Estilos para FullCalendar en modo oscuro */
+.calendarioContainer :global(.fc) {
+  background: #252526;
+  color: #d4d4d4;
+  font-family: 'Segoe UI', 'SF Mono', monospace;
+}
+
+.calendarioContainer :global(.fc-toolbar-title) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #9cdcfe;
+}
+
+.calendarioContainer :global(.fc-button) {
+  background: #3c3c3c;
+  border: 1px solid #3c3c3c;
+  color: #d4d4d4;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.calendarioContainer :global(.fc-button:hover) {
+  background: #0e639c;
+  border-color: #0e639c;
+}
+
+.calendarioContainer :global(.fc-button-primary:not(:disabled):active) {
+  background: #0e639c;
+  border-color: #0e639c;
+}
+
+.calendarioContainer :global(.fc-button-primary:focus) {
+  box-shadow: 0 0 0 2px rgba(14, 99, 156, 0.5);
+}
+
+.calendarioContainer :global(.fc-daygrid-day) {
+  background: #2d2d2d;
+  border-color: #3c3c3c;
+}
+
+.calendarioContainer :global(.fc-daygrid-day-number) {
+  color: #d4d4d4;
+  font-size: 12px;
+  padding: 4px;
+}
+
+.calendarioContainer :global(.fc-daygrid-day.fc-day-today) {
+  background: #1e3a5f;
+}
+
+.calendarioContainer :global(.fc-day-today .fc-daygrid-day-number) {
+  color: #9cdcfe;
+  font-weight: bold;
+}
+
+.calendarioContainer :global(.fc-daygrid-day.fc-day-past) {
+  background: #252526;
+}
+
+.calendarioContainer :global(.fc-daygrid-day.fc-day-future) {
+  background: #2d2d2d;
+}
+
+.calendarioContainer :global(.fc-daygrid-day-events) {
+  min-height: 60px;
+}
+
+.calendarioContainer :global(.fc-daygrid-event) {
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin: 1px 2px;
+  cursor: pointer;
+}
+
+.calendarioContainer :global(.fc-daygrid-event:hover) {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.calendarioContainer :global(.fc-col-header-cell) {
+  background: #1e1e1e;
+  border-color: #3c3c3c;
+}
+
+.calendarioContainer :global(.fc-col-header-cell-cushion) {
+  color: #9cdcfe;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px 4px;
+}
+
+.calendarioContainer :global(.fc-scrollgrid) {
+  border-color: #3c3c3c;
+}
+
+.calendarioContainer :global(.fc-scrollgrid-section) {
+  border-color: #3c3c3c;
+}
+
+.calendarioContainer :global(.fc-daygrid-day-frame) {
+  border-color: #3c3c3c;
+}
+
+/* Eventos específicos */
+.calendarioContainer :global(.fc-daygrid-event) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Toolbar responsive */
+@media (max-width: 768px) {
+  .calendarioContainer :global(.fc-toolbar) {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .calendarioContainer :global(.fc-toolbar-title) {
+    font-size: 1rem;
+  }
+  
+  .calendarioContainer :global(.fc-button) {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* Scrollbar para el calendario */
+.calendarioContainer :global(.fc-scroller-harness)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.calendarioContainer :global(.fc-scroller-harness)::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.calendarioContainer :global(.fc-scroller-harness)::-webkit-scrollbar-thumb {
+  background: #3c3c3c;
+  border-radius: 3px;
+}
+
+.calendarioContainer :global(.fc-scroller-harness)::-webkit-scrollbar-thumb:hover {
+  background: #0e639c;
+}
