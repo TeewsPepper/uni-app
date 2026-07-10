@@ -88,28 +88,45 @@ function App() {
 
   // ✅ Función para verificar onboarding
   const checkOnboarding = useCallback((userData: { id: string; email: string }) => {
+    if (!userData?.id) {
+      console.log('❌ checkOnboarding: userData.id es undefined');
+      return false;
+    }
+    
     try {
       const ONBOARDING_KEY = 'onboarding_completed_v1';
-      const completed = localStorage.getItem(`${ONBOARDING_KEY}_${userData.id}`);
+      const storageKey = `${ONBOARDING_KEY}_${userData.id}`;
+      const completed = localStorage.getItem(storageKey);
       const shouldShow = !completed;
+      
       console.log('🔍 Check onboarding:', { 
-        userId: userData.id, 
-        completed: !!completed, 
+        userId: userData.id,
+        email: userData.email,
+        storageKey,
+        completed: !!completed,
         shouldShow 
       });
       return shouldShow;
-    } catch {
+    } catch (error) {
+      console.error('Error checking onboarding:', error);
       return false;
     }
   }, []);
 
   // ✅ FORZAR RENDER DEL ONBOARDING DESPUÉS DEL LOGIN
   useEffect(() => {
+    console.log('🔄 useEffect force - userId:', userId, 'showOnboarding:', showOnboarding);
+    
     if (userId && !showOnboarding) {
       const ONBOARDING_KEY = 'onboarding_completed_v1';
-      const completed = localStorage.getItem(`${ONBOARDING_KEY}_${userId}`);
-      if (!completed) {
-        console.log('🔄 Forzando onboarding desde useEffect');
+      const storageKey = `${ONBOARDING_KEY}_${userId}`;
+      const completed = localStorage.getItem(storageKey);
+      const shouldShow = !completed;
+      
+      console.log('🔄 Force onboarding:', { userId, storageKey, completed: !!completed, shouldShow });
+      
+      if (shouldShow) {
+        console.log('✅ Forzando onboarding desde useEffect');
         setShowOnboarding(true);
       }
     }
@@ -131,6 +148,11 @@ function App() {
         const data = (await res.json()) as AuthMeResponse;
 
         if (data.user) {
+          console.log('👤 Usuario autenticado (inicial):', { 
+            id: data.user.id, 
+            email: data.user.email 
+          });
+          
           setIsAuthenticated(true);
           setUserEmail(data.user.email);
           setUserId(data.user.id);
@@ -140,8 +162,8 @@ function App() {
           
           // ✅ Verificar onboarding después de cargar datos
           const shouldShow = checkOnboarding(data.user);
-          setShowOnboarding(shouldShow);
           console.log('🎯 Onboarding inicial:', shouldShow);
+          setShowOnboarding(shouldShow);
         } else {
           setIsAuthenticated(false);
         }
@@ -306,7 +328,7 @@ function App() {
     [eliminarMateria, cargarMaterias, cargarTareas, recargar],
   );
 
-  // ✅ Manejar login exitoso
+  // ✅ Manejar login exitoso - CON VERIFICACIÓN ROBUSTA
   const handleLoginSuccess = useCallback(async (): Promise<void> => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -320,16 +342,28 @@ function App() {
       const data = (await res.json()) as AuthMeResponse;
 
       if (data.user) {
+        console.log('👤 Usuario autenticado (login):', { 
+          id: data.user.id, 
+          email: data.user.email 
+        });
+        
         setIsAuthenticated(true);
         setUserEmail(data.user.email);
         setUserId(data.user.id);
         
         await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
         
-        // ✅ Verificar onboarding después del login
+        // ✅ Verificar onboarding después de cargar datos
         const shouldShow = checkOnboarding(data.user);
         console.log('🎯 Onboarding después de login:', shouldShow);
-        setShowOnboarding(shouldShow);
+        
+        // ✅ Forzar el onboarding después de asegurar que userId está establecido
+        if (shouldShow) {
+          setTimeout(() => {
+            setShowOnboarding(true);
+            console.log('✅ Forzando showOnboarding = true');
+          }, 300);
+        }
       }
     } catch (err: unknown) {
       setError(getErrorMessage(err));
@@ -457,7 +491,7 @@ function App() {
         </div>
       )}
 
-      {/* 🔹 5. OnboardingTour - CON EL TRUCO DEL useEffect */}
+      {/* 🔹 5. OnboardingTour - Renderizado condicional */}
       {showOnboarding && userId && (
         <OnboardingTour 
           userId={userId}
@@ -465,6 +499,7 @@ function App() {
             if (userId) {
               const ONBOARDING_KEY = 'onboarding_completed_v1';
               localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
+              console.log('✅ Onboarding completado manualmente');
             }
             setShowOnboarding(false);
           }}
@@ -472,6 +507,7 @@ function App() {
             if (userId) {
               const ONBOARDING_KEY = 'onboarding_completed_v1';
               localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
+              console.log('⏭️ Onboarding saltado manualmente');
             }
             setShowOnboarding(false);
           }}
