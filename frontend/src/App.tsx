@@ -17,10 +17,8 @@ import type { Materia, Horario, Examen, AuthMeResponse } from "./types";
 import styles from "./App.module.css";
 import { OnboardingTour } from "./components/Onboarding/OnboardingTour";
 
-// ✅ USAR VARIABLE DE ENTORNO para la API
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
-// ✨ Función para formatear fecha a ISO sin zona horaria
 const toLocalISODate = (fecha: string): string => {
   const [year, month, day] = fecha.split("-");
   const date = new Date(
@@ -31,7 +29,6 @@ const toLocalISODate = (fecha: string): string => {
   return date.toISOString();
 };
 
-// ✨ Función para extraer fecha YYYY-MM-DD de un objeto Date
 const extractDateFromDate = (fecha: Date): string => {
   const year = fecha.getFullYear();
   const month = String(fecha.getMonth() + 1).padStart(2, "0");
@@ -39,7 +36,6 @@ const extractDateFromDate = (fecha: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-// ✨ Helper para manejar errores de forma segura
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
   if (typeof err === "string") return err;
@@ -52,9 +48,9 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   
-  // ✅ Estados para el onboarding
+  // ✅ Usar email como identificador (el backend no devuelve id)
+  const [userIdentifier, setUserIdentifier] = useState<string>("");
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string>("");
   
   const [materiaEditando, setMateriaEditando] = useState<Materia | null>(null);
   const [mostrarModalDia, setMostrarModalDia] = useState<boolean>(false);
@@ -86,22 +82,21 @@ function App() {
     recargar,
   } = useExamenes();
 
-  // ✅ Función para verificar onboarding
-  const checkOnboarding = useCallback((userData: { id: string; email: string }) => {
-    if (!userData?.id) {
-      console.log('❌ checkOnboarding: userData.id es undefined');
+  // ✅ Función para verificar onboarding (usa email)
+  const checkOnboarding = useCallback((identifier: string) => {
+    if (!identifier) {
+      console.log('❌ checkOnboarding: identifier es undefined o vacío');
       return false;
     }
     
     try {
       const ONBOARDING_KEY = 'onboarding_completed_v1';
-      const storageKey = `${ONBOARDING_KEY}_${userData.id}`;
+      const storageKey = `${ONBOARDING_KEY}_${identifier}`;
       const completed = localStorage.getItem(storageKey);
       const shouldShow = !completed;
       
       console.log('🔍 Check onboarding:', { 
-        userId: userData.id,
-        email: userData.email,
+        identifier,
         storageKey,
         completed: !!completed,
         shouldShow 
@@ -113,24 +108,24 @@ function App() {
     }
   }, []);
 
-  // ✅ FORZAR RENDER DEL ONBOARDING DESPUÉS DEL LOGIN
+  // ✅ useEffect para forzar onboarding
   useEffect(() => {
-    console.log('🔄 useEffect force - userId:', userId, 'showOnboarding:', showOnboarding);
+    console.log('🔄 useEffect force - identifier:', userIdentifier, 'showOnboarding:', showOnboarding);
     
-    if (userId && !showOnboarding) {
+    if (userIdentifier && !showOnboarding) {
       const ONBOARDING_KEY = 'onboarding_completed_v1';
-      const storageKey = `${ONBOARDING_KEY}_${userId}`;
+      const storageKey = `${ONBOARDING_KEY}_${userIdentifier}`;
       const completed = localStorage.getItem(storageKey);
       const shouldShow = !completed;
       
-      console.log('🔄 Force onboarding:', { userId, storageKey, completed: !!completed, shouldShow });
+      console.log('🔄 Force onboarding:', { userIdentifier, storageKey, completed: !!completed, shouldShow });
       
       if (shouldShow) {
         console.log('✅ Forzando onboarding desde useEffect');
         setShowOnboarding(true);
       }
     }
-  }, [userId, showOnboarding]);
+  }, [userIdentifier, showOnboarding]);
 
   // ✨ Verificar autenticación al cargar
   useEffect(() => {
@@ -148,20 +143,21 @@ function App() {
         const data = (await res.json()) as AuthMeResponse;
 
         if (data.user) {
+          // ✅ Usar email como identificador
+          const identifier = data.user.email;
+          
           console.log('👤 Usuario autenticado (inicial):', { 
-            id: data.user.id, 
-            email: data.user.email 
+            email: data.user.email,
+            identifier 
           });
           
           setIsAuthenticated(true);
           setUserEmail(data.user.email);
-          setUserId(data.user.id);
+          setUserIdentifier(identifier);
           
-          // ✅ Cargar datos después de autenticar
           await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
           
-          // ✅ Verificar onboarding después de cargar datos
-          const shouldShow = checkOnboarding(data.user);
+          const shouldShow = checkOnboarding(identifier);
           console.log('🎯 Onboarding inicial:', shouldShow);
           setShowOnboarding(shouldShow);
         } else {
@@ -187,7 +183,7 @@ function App() {
     } finally {
       setIsAuthenticated(false);
       setUserEmail("");
-      setUserId("");
+      setUserIdentifier("");
       setShowOnboarding(false);
     }
   }, []);
@@ -257,7 +253,6 @@ function App() {
     setMostrarExamenModal(true);
   }, []);
 
-  // ✨ Abrir modal para crear un nuevo examen
   const handleAbrirModalExamen = useCallback((materiaId: string): void => {
     const nuevoExamen: Examen = {
       _id: "",
@@ -328,7 +323,6 @@ function App() {
     [eliminarMateria, cargarMaterias, cargarTareas, recargar],
   );
 
-  // ✅ Manejar login exitoso - CON VERIFICACIÓN ROBUSTA
   const handleLoginSuccess = useCallback(async (): Promise<void> => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -342,22 +336,23 @@ function App() {
       const data = (await res.json()) as AuthMeResponse;
 
       if (data.user) {
+        // ✅ Usar email como identificador
+        const identifier = data.user.email;
+        
         console.log('👤 Usuario autenticado (login):', { 
-          id: data.user.id, 
-          email: data.user.email 
+          email: data.user.email,
+          identifier 
         });
         
         setIsAuthenticated(true);
         setUserEmail(data.user.email);
-        setUserId(data.user.id);
+        setUserIdentifier(identifier);
         
         await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
         
-        // ✅ Verificar onboarding después de cargar datos
-        const shouldShow = checkOnboarding(data.user);
+        const shouldShow = checkOnboarding(identifier);
         console.log('🎯 Onboarding después de login:', shouldShow);
         
-        // ✅ Forzar el onboarding después de asegurar que userId está establecido
         if (shouldShow) {
           setTimeout(() => {
             setShowOnboarding(true);
@@ -382,12 +377,10 @@ function App() {
 
   return (
     <div className={styles.dashboard}>
-      {/* 🔹 1. DashboardHeader con ID para onboarding */}
       <div id="dashboard-header">
         <DashboardHeader userEmail={userEmail} onLogout={handleLogout} />
       </div>
 
-      {/* 🔹 2. ProximosEventos con ID para onboarding */}
       <div id="proximos-eventos">
         <ProximosEventos
           tareas={tareas}
@@ -398,7 +391,6 @@ function App() {
         />
       </div>
 
-      {/* 🔹 3. Calendario con ID para onboarding */}
       <div id="calendario-container">
         <Calendario
           tareas={tareas}
@@ -408,7 +400,6 @@ function App() {
         />
       </div>
 
-      {/* 🔹 4. Sección de Materias con ID para el botón de agregar */}
       <div>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
@@ -438,7 +429,6 @@ function App() {
         </div>
       </div>
 
-      {/* Modales existentes (sin cambios) */}
       <MateriaEditModal
         visible={!!materiaEditando}
         materia={materiaEditando}
@@ -491,23 +481,23 @@ function App() {
         </div>
       )}
 
-      {/* 🔹 5. OnboardingTour - Renderizado condicional */}
-      {showOnboarding && userId && (
+      {/* ✅ OnboardingTour con email como identificador */}
+      {showOnboarding && userIdentifier && (
         <OnboardingTour 
-          userId={userId}
+          userId={userIdentifier}
           onComplete={() => {
-            if (userId) {
+            if (userIdentifier) {
               const ONBOARDING_KEY = 'onboarding_completed_v1';
-              localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
-              console.log('✅ Onboarding completado manualmente');
+              localStorage.setItem(`${ONBOARDING_KEY}_${userIdentifier}`, 'true');
+              console.log('✅ Onboarding completado para:', userIdentifier);
             }
             setShowOnboarding(false);
           }}
           onSkip={() => {
-            if (userId) {
+            if (userIdentifier) {
               const ONBOARDING_KEY = 'onboarding_completed_v1';
-              localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
-              console.log('⏭️ Onboarding saltado manualmente');
+              localStorage.setItem(`${ONBOARDING_KEY}_${userIdentifier}`, 'true');
+              console.log('⏭️ Onboarding saltado para:', userIdentifier);
             }
             setShowOnboarding(false);
           }}
