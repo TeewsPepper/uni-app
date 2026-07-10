@@ -63,7 +63,6 @@ export const useOnboarding = (props: {
   const { userId, onComplete, onSkip } = props;
   
   const [currentStep, setCurrentStep] = useState(0);
-  // ✅ Inicializar como false, y el useEffect lo activará si debe mostrar
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
@@ -84,18 +83,26 @@ export const useOnboarding = (props: {
         userId,
         storageKey,
         completed: !!completed,
+        completedValue: completed,
         shouldShow
       });
+      
+      // ✅ Forzar para pruebas: Si no hay datos, mostrar
+      // Si quieres probar siempre, descomenta la línea de abajo
+      // const shouldShow = true; // <-- FORZAR PARA PRUEBAS
       
       setIsActive(shouldShow);
       if (shouldShow) {
         setCurrentStep(0);
+        console.log('✅ Onboarding activado!');
+      } else {
+        console.log('❌ Onboarding ya completado para este usuario');
       }
     } catch (error) {
       console.error('Error checking onboarding:', error);
       setIsActive(false);
     }
-  }, [userId, onComplete]);
+  }, [userId]);
 
   const nextStep = useCallback(() => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {

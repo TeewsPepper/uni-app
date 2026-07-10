@@ -17,7 +17,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   onComplete,
   onSkip
 }) => {
-  console.log('🎯 OnboardingTour montado con userId:', userId);
+  console.log('🎯 OnboardingTour renderizado con userId:', userId);
   
   const {
     currentStep,
@@ -29,10 +29,16 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     skipOnboarding
   } = useOnboarding({ userId, onComplete, onSkip });
 
-  console.log('🎯 OnboardingTour estado:', { isActive, currentStep, totalSteps });
+  console.log('🎯 OnboardingTour estado:', { 
+    isActive, 
+    currentStep, 
+    totalSteps,
+    currentStepId: currentStepData?.id 
+  });
 
   useEffect(() => {
     if (isActive) {
+      console.log('🔄 Onboarding activo - bloqueando scroll');
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -49,9 +55,8 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     };
   }, [isActive]);
 
-  // ✅ Mostrar mientras carga
   if (!isActive) {
-    console.log('❌ Onboarding no activo');
+    console.log('❌ Onboarding no activo, retornando null');
     return null;
   }
 
@@ -59,7 +64,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   const { target, position } = currentStepData;
 
   return (
-    <div className="onboarding-tour">
+    <div className="onboarding-tour" style={{ position: 'relative', zIndex: 9999 }}>
       <OnboardingOverlay targetId={target} position={position}>
         <div className={styles.onboardingCard}>
           <OnboardingProgress
