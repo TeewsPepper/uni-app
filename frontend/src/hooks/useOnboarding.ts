@@ -14,28 +14,28 @@ export interface OnboardingStep {
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
-    title: '🎓 ¡Bienvenido a Agenda Universitaria!',
-    description: 'Organiza tus materias, tareas y exámenes en un solo lugar. ¡Nunca fue tan fácil mantenerte al día!',
+    title: '🎓 ¡Bienvenido/a a UniApp!',
+    description: 'Organiza tus materias, parciales, calificaciones y más en un solo lugar. ¡Nunca fue tan fácil mantenerte al día!',
     position: 'center'
   },
   {
     id: 'header',
     title: '👤 Tu Panel de Control',
-    description: 'Aquí puedes ver tu correo electrónico y cerrar sesión cuando quieras. Siempre tendrás el control.',
+    description: 'Aquí puedes ver tu usuario y cerrar sesión cuando quieras. Siempre tendrás el control.',
     target: 'dashboard-header',
     position: 'bottom'
   },
   {
     id: 'events',
     title: '📋 Próximos Eventos',
-    description: 'Tus tareas y exámenes más cercanos aparecerán aquí. ¡No olvides ninguna fecha importante!',
+    description: 'Tus tareas y exámenes más cercanos aparecerán aquí. ¡No olvides ninguna fecha esta semana!',
     target: 'proximos-eventos',
     position: 'bottom'
   },
   {
     id: 'calendar',
     title: '📅 Calendario Interactivo',
-    description: 'Haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
+    description: 'Despliega el calendario y haz clic en cualquier día para ver o agregar eventos. Visualiza un mes semana o día de un vistazo.',
     target: 'calendario-container',
     position: 'bottom'
   },
@@ -56,6 +56,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 
 const ONBOARDING_KEY = 'onboarding_completed_v1';
 
+// ✅ Usamos sessionStorage en lugar de localStorage
+// sessionStorage se borra automáticamente al cerrar la pestaña/navegador
+const storage = sessionStorage;
+
 export const useOnboarding = () => {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
@@ -71,8 +75,17 @@ export const useOnboarding = () => {
       }
 
       try {
-        const completed = localStorage.getItem(`${ONBOARDING_KEY}_${user.id}`);
+        // ✅ Verificar en sessionStorage
+        const completed = storage.getItem(`${ONBOARDING_KEY}_${user.id}`);
         const shouldShow = !completed;
+        
+        console.log('🔍 Onboarding (sessionStorage):', {
+          userId: user.id,
+          email: user.email,
+          completed: !!completed,
+          shouldShow,
+          storageKey: `${ONBOARDING_KEY}_${user.id}`
+        });
         
         setIsActive(shouldShow);
         if (shouldShow) {
@@ -116,7 +129,8 @@ export const useOnboarding = () => {
   const completeOnboarding = useCallback(() => {
     if (user) {
       try {
-        localStorage.setItem(`${ONBOARDING_KEY}_${user.id}`, 'true');
+        // ✅ Guardar en sessionStorage
+        storage.setItem(`${ONBOARDING_KEY}_${user.id}`, 'true');
         setIsActive(false);
         // Pequeño delay para que se vea la animación de cierre
         setTimeout(() => {
@@ -124,6 +138,8 @@ export const useOnboarding = () => {
           document.body.style.position = '';
           document.body.style.width = '';
         }, 300);
+        
+        console.log('✅ Onboarding completado para usuario:', user.email);
       } catch (error) {
         console.error('Error completing onboarding:', error);
       }
@@ -131,7 +147,7 @@ export const useOnboarding = () => {
   }, [user]);
 
   const skipOnboarding = useCallback(() => {
-    if (window.confirm('¿Seguro que quieres saltar el onboarding? Puedes volver a verlo desde configuración.')) {
+    if (window.confirm('¿Seguro que quieres saltar el onboarding? Puedes volver a verlo recargando la página.')) {
       completeOnboarding();
     }
   }, [completeOnboarding]);
@@ -139,10 +155,13 @@ export const useOnboarding = () => {
   const resetOnboarding = useCallback(() => {
     if (user) {
       try {
-        localStorage.removeItem(`${ONBOARDING_KEY}_${user.id}`);
+        // ✅ Eliminar de sessionStorage
+        storage.removeItem(`${ONBOARDING_KEY}_${user.id}`);
         setIsActive(true);
         setCurrentStep(0);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        console.log('🔄 Onboarding reseteado para usuario:', user.email);
       } catch (error) {
         console.error('Error resetting onboarding:', error);
       }
