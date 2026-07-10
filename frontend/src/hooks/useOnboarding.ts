@@ -13,14 +13,14 @@ export interface OnboardingStep {
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'welcome',
-    title: '🎓 ¡Bienvenido a Agenda Universitaria!',
-    description: 'Organiza tus materias, tareas y exámenes en un solo lugar. ¡Nunca fue tan fácil mantenerte al día!',
+    title: '🎓 ¡Bienvenido/a a UniApp!',
+    description: 'Organiza tus materias, tareas, parciales, calificaciones y más en un solo lugar. ¡Nunca fue tan fácil mantenerte al día!',
     position: 'center'
   },
   {
     id: 'header',
     title: '👤 Tu Panel de Control',
-    description: 'Aquí puedes ver tu correo electrónico y cerrar sesión cuando quieras. Siempre tendrás el control.',
+    description: 'Aquí puedes ver tu usuario y cerrar sesión cuando quieras. Siempre tendrás el control.',
     target: 'dashboard-header',
     position: 'bottom'
   },
@@ -36,7 +36,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '📅 Calendario Interactivo',
     description: 'Haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
     target: 'calendario-container',
-    position: 'top'
+    position: 'bottom'
   },
   {
     id: 'add-materia',
