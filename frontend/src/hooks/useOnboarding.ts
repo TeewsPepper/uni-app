@@ -43,7 +43,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '➕ ¡Empieza Ahora!',
     description: 'Crea tu primera materia y comienza a organizar tu vida universitaria. ¡Es más fácil de lo que piensas!',
     target: 'add-materia-button',
-    position: 'center'
+    position: 'top'
   },
   {
     id: 'complete',

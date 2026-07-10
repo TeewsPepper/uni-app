@@ -14,9 +14,12 @@
   --text-muted: #8b8b8b;
   --text-light: #cccccc;
   --border-color: #3c3c3c;
-  --accent-primary: #007acc;
-  --accent-secondary: #00b4d8;
+  
+  
+  --accent-primary: #7c3aed;  
+  --accent-secondary: #a78bfa; 
   --accent-purple: #7c3aed;
+  
   --shadow-color: rgba(0, 0, 0, 0.8);
   --transition-speed: 0.3s;
 }
@@ -389,17 +392,17 @@
 
 /* Botón Siguiente / Empezar */
 .nextButton {
-  background: var(--accent-primary);
+  background: var(--accent-primary); /* #7c3aed */
   color: white;
   border: 1px solid var(--accent-primary);
-  box-shadow: 0 4px 12px rgba(0, 122, 204, 0.2);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2); /* Sombra morada */
 }
 
 .nextButton:hover {
-  background: #005999;
-  border-color: #005999;
+  background: #6d28d9; /* Tu hover de buttonPrimary */
+  border-color: #6d28d9;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 122, 204, 0.3);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
 }
 
 .nextButton:active {

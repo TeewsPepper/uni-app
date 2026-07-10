@@ -15,7 +15,28 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
 }) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [isHighlightVisible, setIsHighlightVisible] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
 
+  // Detectar cambios de tamaño
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+      setViewportWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResize, 300);
+    });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
+
+  // Obtener el elemento target
   useEffect(() => {
     if (targetId) {
       const element = document.getElementById(targetId);
@@ -57,6 +78,9 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
 
     window.addEventListener('resize', handleUpdate);
     window.addEventListener('scroll', handleUpdate);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleUpdate, 300);
+    });
     
     return () => {
       window.removeEventListener('resize', handleUpdate);
@@ -72,19 +96,49 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
         left: '50%',
         transform: 'translate(-50%, -50%)',
         zIndex: 1000,
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        maxWidth: '94vw',
+        width: '100%'
       };
     }
 
-    const spacing = 20;
-    const windowHeight = window.innerHeight;
-    const windowWidth = window.innerWidth;
+    const isMobile = viewportWidth <= 768;
+    const cardHeight = isMobile ? 280 : 300;
+    const cardWidth = isMobile ? viewportWidth - 32 : 400;
+    
+    // ✅ Espaciado mayor para 'top' (para que no tape el botón)
+    const spacing = position === 'top' ? 24 : 16;
 
     let top: number, left: number;
+    let finalPosition = position;
 
-    switch (position) {
+    // En móvil, ajustar si es necesario
+    if (isMobile) {
+      const spaceAbove = targetRect.top;
+      const spaceBelow = viewportHeight - targetRect.bottom;
+      
+      // Si es 'top' y no hay espacio arriba, centrar o poner abajo
+      if (position === 'top' && spaceAbove < cardHeight + 40) {
+        if (spaceBelow > cardHeight + 40) {
+          finalPosition = 'bottom';
+        } else {
+          finalPosition = 'center';
+        }
+      }
+      // Si es 'bottom' y no hay espacio abajo, poner arriba
+      else if (position === 'bottom' && spaceBelow < cardHeight + 40) {
+        if (spaceAbove > cardHeight + 40) {
+          finalPosition = 'top';
+        } else {
+          finalPosition = 'center';
+        }
+      }
+    }
+
+    switch (finalPosition) {
       case 'top':
-        top = targetRect.top - spacing;
+        // ✅ Para 'top', usar más espacio entre tooltip y botón
+        top = targetRect.top - cardHeight - spacing;
         left = targetRect.left + targetRect.width / 2;
         break;
       case 'bottom':
@@ -93,7 +147,7 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
         break;
       case 'left':
         top = targetRect.top + targetRect.height / 2;
-        left = targetRect.left - spacing;
+        left = targetRect.left - cardWidth - spacing;
         break;
       case 'right':
         top = targetRect.top + targetRect.height / 2;
@@ -101,35 +155,33 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
         break;
       case 'center':
       default:
-        top = windowHeight / 2;
-        left = windowWidth / 2;
+        top = viewportHeight / 2;
+        left = viewportWidth / 2;
     }
 
-    // Ajustar posición para que no se salga de la pantalla
-    const estimatedWidth = 400;
-    const estimatedHeight = 300;
-
-    if (left + estimatedWidth / 2 > windowWidth) {
-      left = windowWidth - estimatedWidth / 2 - 10;
-    }
-    if (left - estimatedWidth / 2 < 0) {
-      left = estimatedWidth / 2 + 10;
-    }
-    if (top + estimatedHeight > windowHeight) {
-      top = windowHeight - estimatedHeight - 10;
-    }
-    if (top < 0) {
+    // Ajustar para que no se salga de la pantalla
+    if (top < 10) {
       top = 10;
+    }
+    if (top + cardHeight > viewportHeight - 10) {
+      top = viewportHeight - cardHeight - 10;
+    }
+    if (left + cardWidth / 2 > viewportWidth) {
+      left = viewportWidth - cardWidth / 2 - 10;
+    }
+    if (left - cardWidth / 2 < 0) {
+      left = cardWidth / 2 + 10;
     }
 
     return {
       position: 'fixed',
       top: `${top}px`,
       left: `${left}px`,
-      transform: position === 'center' ? 'translate(-50%, -50%)' : 'translateX(-50%)',
+      transform: finalPosition === 'center' ? 'translate(-50%, -50%)' : 'translateX(-50%)',
       zIndex: 1000,
       pointerEvents: 'auto',
-      maxWidth: '90vw'
+      maxWidth: isMobile ? `${viewportWidth - 20}px` : '400px',
+      width: '100%'
     };
   };
 
@@ -142,12 +194,13 @@ export const OnboardingOverlay: React.FC<OnboardingOverlayProps> = ({
           className={`${styles.highlight} ${styles.highlightInteractive}`}
           style={{
             position: 'fixed',
-            top: targetRect.top - 8,
-            left: targetRect.left - 8,
-            width: targetRect.width + 16,
-            height: targetRect.height + 16,
+            top: targetRect.top - 6,
+            left: targetRect.left - 6,
+            width: targetRect.width + 12,
+            height: targetRect.height + 12,
             zIndex: 999,
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            borderRadius: '6px'
           }}
         />
       )}
