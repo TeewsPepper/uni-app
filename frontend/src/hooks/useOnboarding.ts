@@ -1,5 +1,5 @@
 // frontend/src/hooks/useOnboarding.ts
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface OnboardingStep {
   id: string;
@@ -53,19 +53,49 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   }
 ];
 
-// ✅ Hook SIN localStorage - Solo estado en memoria
+const ONBOARDING_KEY = 'onboarding_completed_v1';
+
 export const useOnboarding = (props: {
-  isNewUser: boolean;
+  userId: string;
   onComplete?: () => void;
   onSkip?: () => void;
 }) => {
-  const { isNewUser, onComplete, onSkip } = props;
+  const { userId, onComplete, onSkip } = props;
   
   const [currentStep, setCurrentStep] = useState(0);
-  // ✅ isActive se inicializa con isNewUser
-  const [isActive, setIsActive] = useState(isNewUser);
+  const [isActive, setIsActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  console.log('🎯 useOnboarding:', { isNewUser, isActive });
+  useEffect(() => {
+    if (!userId) {
+      setIsActive(false);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const storageKey = `${ONBOARDING_KEY}_${userId}`;
+      const completed = localStorage.getItem(storageKey);
+      const shouldShow = !completed;
+      
+      console.log('🔍 Onboarding Check:', {
+        userId,
+        storageKey,
+        completed: !!completed,
+        shouldShow
+      });
+      
+      setIsActive(shouldShow);
+      if (shouldShow) {
+        setCurrentStep(0);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding:', error);
+      setIsActive(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   const nextStep = useCallback(() => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {
@@ -84,13 +114,21 @@ export const useOnboarding = (props: {
   }, []);
 
   const completeOnboarding = useCallback(() => {
-    console.log('✅ Onboarding completado');
-    setIsActive(false);
-    onComplete?.();
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-  }, [onComplete]);
+    if (userId) {
+      try {
+        const storageKey = `${ONBOARDING_KEY}_${userId}`;
+        localStorage.setItem(storageKey, 'true');
+        console.log('✅ Onboarding completado para usuario:', userId);
+        setIsActive(false);
+        onComplete?.();
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+      } catch (error) {
+        console.error('Error completing onboarding:', error);
+      }
+    }
+  }, [userId, onComplete]);
 
   const skipOnboarding = useCallback(() => {
     if (window.confirm('¿Seguro que quieres saltar el onboarding?')) {
@@ -102,6 +140,7 @@ export const useOnboarding = (props: {
   return {
     currentStep,
     isActive,
+    isLoading,
     totalSteps: ONBOARDING_STEPS.length,
     currentStepData: ONBOARDING_STEPS[currentStep] || ONBOARDING_STEPS[0],
     nextStep,

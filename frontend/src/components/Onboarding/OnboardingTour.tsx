@@ -7,25 +7,30 @@ import { useOnboarding } from '../../hooks/useOnboarding';
 import styles from './Onboarding.module.css';
 
 interface OnboardingTourProps {
-  isNewUser: boolean;
+  userId: string;
   onComplete: () => void;
   onSkip: () => void;
 }
 
 export const OnboardingTour: React.FC<OnboardingTourProps> = ({
-  isNewUser,
+  userId,
   onComplete,
   onSkip
 }) => {
+  console.log('🎯 OnboardingTour montado con userId:', userId);
+  
   const {
     currentStep,
     isActive,
+    isLoading,
     totalSteps,
     currentStepData,
     nextStep,
     prevStep,
     skipOnboarding
-  } = useOnboarding({ isNewUser, onComplete, onSkip });
+  } = useOnboarding({ userId, onComplete, onSkip });
+
+  console.log('🎯 Estado OnboardingTour:', { isActive, isLoading, currentStep });
 
   useEffect(() => {
     if (isActive) {
@@ -45,10 +50,17 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     };
   }, [isActive]);
 
-  if (!isActive) {
+  if (isLoading) {
+    console.log('⏳ Onboarding cargando...');
     return null;
   }
 
+  if (!isActive) {
+    console.log('❌ Onboarding no activo');
+    return null;
+  }
+
+  console.log('✅ Renderizando onboarding, paso:', currentStep + 1);
   const { target, position } = currentStepData;
 
   return (
