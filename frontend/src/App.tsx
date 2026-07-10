@@ -51,10 +51,11 @@ function App() {
   const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
-  
-  // ✅ NUEVO: Estado para controlar el onboarding
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
+  
+  // ✅ Estado para controlar el onboarding (SIN localStorage)
+  const [isNewUser, setIsNewUser] = useState<boolean>(false);
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean>(false);
   
   const [materiaEditando, setMateriaEditando] = useState<Materia | null>(null);
   const [mostrarModalDia, setMostrarModalDia] = useState<boolean>(false);
@@ -86,18 +87,7 @@ function App() {
     recargar,
   } = useExamenes();
 
-  // ✅ Función para verificar onboarding
-  const checkOnboarding = useCallback((userData: { id: string; email: string }) => {
-    try {
-      const ONBOARDING_KEY = 'onboarding_completed_v1';
-      const completed = localStorage.getItem(`${ONBOARDING_KEY}_${userData.id}`);
-      return !completed;
-    } catch {
-      return false;
-    }
-  }, []);
-
-  // ✨ Verificar autenticación al cargar
+  // ✅ Verificar autenticación al cargar
   useEffect(() => {
     const verificarAuth = async (): Promise<void> => {
       try {
@@ -107,6 +97,7 @@ function App() {
 
         if (!res.ok) {
           setIsAuthenticated(false);
+          setLoadingAuth(false);
           return;
         }
 
@@ -120,9 +111,14 @@ function App() {
           // ✅ Cargar datos después de autenticar
           await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
           
-          // ✅ Verificar onboarding después de cargar datos
-          const shouldShow = checkOnboarding(data.user);
-          setShowOnboarding(shouldShow);
+          // ✅ Determinar si es usuario nuevo (sin materias)
+          // Esperamos un tick para que materias se actualice
+          setTimeout(() => {
+            const hasMaterias = materias.length > 0;
+            setIsNewUser(!hasMaterias);
+            console.log('👤 Usuario nuevo (por materias):', !hasMaterias);
+            console.log('📚 Materias:', materias.length);
+          }, 100);
         } else {
           setIsAuthenticated(false);
         }
@@ -135,8 +131,41 @@ function App() {
     };
 
     verificarAuth();
-  }, [cargarMaterias, cargarTareas, recargar, checkOnboarding]);
+  }, [cargarMaterias, cargarTareas, recargar]);
 
+  // ✅ Manejar login exitoso
+  const handleLoginSuccess = useCallback(async (): Promise<void> => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Error al obtener datos del usuario");
+      }
+
+      const data = (await res.json()) as AuthMeResponse;
+
+      if (data.user) {
+        setIsAuthenticated(true);
+        setUserEmail(data.user.email);
+        setUserId(data.user.id);
+        
+        await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
+        
+        // ✅ Determinar si es usuario nuevo (sin materias)
+        setTimeout(() => {
+          const hasMaterias = materias.length > 0;
+          setIsNewUser(!hasMaterias);
+          console.log('👤 Usuario nuevo (login):', !hasMaterias);
+        }, 100);
+      }
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    }
+  }, [cargarMaterias, cargarTareas, recargar, materias.length]);
+
+  // ✅ Manejar logout
   const handleLogout = useCallback(async (): Promise<void> => {
     try {
       await fetch(`${API_BASE_URL}/auth/logout`, {
@@ -147,23 +176,19 @@ function App() {
       setIsAuthenticated(false);
       setUserEmail("");
       setUserId("");
-      setShowOnboarding(false);
+      setIsNewUser(false);
+      setOnboardingComplete(false);
     }
   }, []);
 
   // ✅ Manejar completado del onboarding
   const handleOnboardingComplete = useCallback(() => {
-    if (userId) {
-      try {
-        const ONBOARDING_KEY = 'onboarding_completed_v1';
-        localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
-      } catch (error) {
-        console.error('Error saving onboarding status:', error);
-      }
-    }
-    setShowOnboarding(false);
-  }, [userId]);
+    console.log('🎉 Onboarding completado!');
+    setIsNewUser(false);
+    setOnboardingComplete(true);
+  }, []);
 
+  // ✅ Manejar tareas
   const handleAgregarTarea = useCallback(
     async (materiaId: string, titulo: string, fecha: string): Promise<void> => {
       try {
@@ -177,6 +202,7 @@ function App() {
     [agregarTarea, cargarTareas],
   );
 
+  // ✅ Manejar exámenes
   const handleAgregarExamen = useCallback(
     async (
       materiaId: string,
@@ -204,6 +230,7 @@ function App() {
     [agregarExamen, recargar],
   );
 
+  // ✅ Manejar actualización de materia
   const handleActualizarMateria = useCallback(
     async (
       id: string,
@@ -222,6 +249,7 @@ function App() {
     [actualizarMateria, cargarMaterias],
   );
 
+  // ✅ Manejar edición de examen
   const handleEditarExamen = useCallback((examen: Examen): void => {
     setExamenEditando(examen);
     const fechaStr = extractDateFromDate(new Date(examen.fecha));
@@ -229,7 +257,7 @@ function App() {
     setMostrarExamenModal(true);
   }, []);
 
-  // ✨ Abrir modal para crear un nuevo examen
+  // ✅ Abrir modal para crear nuevo examen
   const handleAbrirModalExamen = useCallback((materiaId: string): void => {
     const nuevoExamen: Examen = {
       _id: "",
@@ -249,6 +277,7 @@ function App() {
     setMostrarExamenModal(true);
   }, []);
 
+  // ✅ Guardar examen
   const handleGuardarExamen = useCallback(
     async (datos: {
       id?: string;
@@ -281,11 +310,13 @@ function App() {
     [actualizarExamen, agregarExamen, recargar],
   );
 
+  // ✅ Manejar click en fecha
   const handleFechaClick = useCallback((fecha: string): void => {
     setFechaSeleccionada(fecha);
     setMostrarModalDia(true);
   }, []);
 
+  // ✅ Eliminar materia
   const handleEliminarMateria = useCallback(
     async (id: string): Promise<void> => {
       try {
@@ -300,34 +331,7 @@ function App() {
     [eliminarMateria, cargarMaterias, cargarTareas, recargar],
   );
 
-  const handleLoginSuccess = useCallback(async (): Promise<void> => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, {
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        throw new Error("Error al obtener datos del usuario");
-      }
-
-      const data = (await res.json()) as AuthMeResponse;
-
-      if (data.user) {
-        setIsAuthenticated(true);
-        setUserEmail(data.user.email);
-        setUserId(data.user.id);
-        
-        await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
-        
-        // ✅ Verificar onboarding después del login
-        const shouldShow = checkOnboarding(data.user);
-        setShowOnboarding(shouldShow);
-      }
-    } catch (err: unknown) {
-      setError(getErrorMessage(err));
-    }
-  }, [cargarMaterias, cargarTareas, recargar, checkOnboarding]);
-
+  // ✅ Renderizado condicional
   if (loadingAuth) return <div className={styles.loading}>Cargando...</div>;
 
   if (!isAuthenticated) {
@@ -366,7 +370,7 @@ function App() {
         />
       </div>
 
-      {/* 🔹 4. Sección de Materias con ID para el botón de agregar */}
+      {/* 🔹 4. Sección de Materias */}
       <div>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
@@ -396,7 +400,7 @@ function App() {
         </div>
       </div>
 
-      {/* Modales existentes (sin cambios) */}
+      {/* Modales existentes */}
       <MateriaEditModal
         visible={!!materiaEditando}
         materia={materiaEditando}
@@ -449,10 +453,10 @@ function App() {
         </div>
       )}
 
-      {/* 🔹 5. OnboardingTour - Controlado por estado */}
-      {showOnboarding && userId && (
+      {/* 🔹 5. OnboardingTour - Solo para usuarios nuevos SIN localStorage */}
+      {isNewUser && !onboardingComplete && userId && (
         <OnboardingTour 
-          userId={userId}
+          isNewUser={isNewUser}
           onComplete={handleOnboardingComplete}
           onSkip={handleOnboardingComplete}
         />
