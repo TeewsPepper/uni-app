@@ -17,8 +17,6 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   onComplete,
   onSkip
 }) => {
-  console.log('🎯 OnboardingTour montado, isNewUser:', isNewUser);
-  
   const {
     currentStep,
     isActive,
