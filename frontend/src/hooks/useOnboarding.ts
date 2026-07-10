@@ -63,22 +63,33 @@ export const useOnboarding = (props: {
   const { userId, onComplete, onSkip } = props;
   
   const [currentStep, setCurrentStep] = useState(0);
-  const [isActive, setIsActive] = useState(true);
-  // ✅ Eliminamos isLoading ya que no lo usamos
+  // ✅ Inicializar como false, y el useEffect lo activará si debe mostrar
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
+    console.log('🔍 useOnboarding - userId:', userId);
+    
     if (!userId) {
+      console.log('❌ No userId, desactivando onboarding');
       setIsActive(false);
       return;
     }
 
     try {
-      const completed = localStorage.getItem(`${ONBOARDING_KEY}_${userId}`);
-      if (completed) {
-        setIsActive(false);
-        onComplete?.();
-      } else {
-        setIsActive(true);
+      const storageKey = `${ONBOARDING_KEY}_${userId}`;
+      const completed = localStorage.getItem(storageKey);
+      const shouldShow = !completed;
+      
+      console.log('🔍 Onboarding Check:', {
+        userId,
+        storageKey,
+        completed: !!completed,
+        shouldShow
+      });
+      
+      setIsActive(shouldShow);
+      if (shouldShow) {
+        setCurrentStep(0);
       }
     } catch (error) {
       console.error('Error checking onboarding:', error);
@@ -105,7 +116,9 @@ export const useOnboarding = (props: {
   const completeOnboarding = useCallback(() => {
     if (userId) {
       try {
-        localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
+        const storageKey = `${ONBOARDING_KEY}_${userId}`;
+        localStorage.setItem(storageKey, 'true');
+        console.log('✅ Onboarding completado para usuario:', userId);
         setIsActive(false);
         onComplete?.();
         document.body.style.overflow = '';

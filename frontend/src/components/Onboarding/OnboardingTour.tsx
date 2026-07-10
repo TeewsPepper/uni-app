@@ -17,6 +17,8 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
   onComplete,
   onSkip
 }) => {
+  console.log('🎯 OnboardingTour montado con userId:', userId);
+  
   const {
     currentStep,
     isActive,
@@ -26,6 +28,8 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     prevStep,
     skipOnboarding
   } = useOnboarding({ userId, onComplete, onSkip });
+
+  console.log('🎯 OnboardingTour estado:', { isActive, currentStep, totalSteps });
 
   useEffect(() => {
     if (isActive) {
@@ -45,11 +49,13 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({
     };
   }, [isActive]);
 
-  // ✅ Ya no necesitamos isLoading
+  // ✅ Mostrar mientras carga
   if (!isActive) {
+    console.log('❌ Onboarding no activo');
     return null;
   }
 
+  console.log('✅ Renderizando onboarding, paso:', currentStep + 1);
   const { target, position } = currentStepData;
 
   return (
