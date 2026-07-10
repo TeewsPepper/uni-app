@@ -1,3 +1,5 @@
+/* frontend/src/components/Onboarding/Onboarding.module.css */
+
 /* ============================================
    Onboarding.module.css
    Tema oscuro estilo VS Code - Compatible con App.module.css
@@ -14,12 +16,9 @@
   --text-muted: #8b8b8b;
   --text-light: #cccccc;
   --border-color: #3c3c3c;
-  
-  
-  --accent-primary: #7c3aed;  
-  --accent-secondary: #a78bfa; 
+  --accent-primary: #7c3aed;
+  --accent-secondary: #a78bfa;
   --accent-purple: #7c3aed;
-  
   --shadow-color: rgba(0, 0, 0, 0.8);
   --transition-speed: 0.3s;
 }
@@ -76,11 +75,11 @@
   pointer-events: none;
   box-shadow: 
     0 0 0 4px var(--accent-primary),
-    0 0 30px rgba(0, 122, 204, 0.3),
-    inset 0 0 30px rgba(0, 122, 204, 0.05);
+    0 0 30px rgba(124, 58, 237, 0.3),
+    inset 0 0 30px rgba(124, 58, 237, 0.05);
   animation: highlight-pulse 2s ease-in-out infinite;
   z-index: 999;
-  background: rgba(0, 122, 204, 0.04);
+  background: rgba(124, 58, 237, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -88,14 +87,14 @@
   0%, 100% {
     box-shadow: 
       0 0 0 4px var(--accent-primary),
-      0 0 30px rgba(0, 122, 204, 0.3),
-      inset 0 0 30px rgba(0, 122, 204, 0.05);
+      0 0 30px rgba(124, 58, 237, 0.3),
+      inset 0 0 30px rgba(124, 58, 237, 0.05);
   }
   50% {
     box-shadow: 
       0 0 0 6px var(--accent-primary),
-      0 0 50px rgba(0, 122, 204, 0.5),
-      inset 0 0 40px rgba(0, 122, 204, 0.1);
+      0 0 50px rgba(124, 58, 237, 0.5),
+      inset 0 0 40px rgba(124, 58, 237, 0.1);
   }
 }
 
@@ -109,15 +108,15 @@
   0%, 100% {
     box-shadow: 
       0 0 0 4px var(--accent-secondary),
-      0 0 30px rgba(0, 180, 216, 0.3),
-      inset 0 0 30px rgba(0, 180, 216, 0.05);
+      0 0 30px rgba(167, 139, 250, 0.3),
+      inset 0 0 30px rgba(167, 139, 250, 0.05);
     transform: scale(1);
   }
   50% {
     box-shadow: 
       0 0 0 6px var(--accent-secondary),
-      0 0 50px rgba(0, 180, 216, 0.5),
-      inset 0 0 40px rgba(0, 180, 216, 0.1);
+      0 0 50px rgba(167, 139, 250, 0.5),
+      inset 0 0 40px rgba(167, 139, 250, 0.1);
     transform: scale(1.01);
   }
 }
@@ -210,7 +209,6 @@
   position: relative;
 }
 
-/* Efecto de brillo en la barra de progreso */
 .progressFill::after {
   content: '';
   position: absolute;
@@ -248,7 +246,7 @@
 }
 
 /* ============================================
-   BOTÓN SKIP (en la barra de progreso)
+   BOTÓN SKIP
    ============================================ */
 
 .skipButton {
@@ -336,7 +334,7 @@
 }
 
 /* ============================================
-   ACCIONES DEL PASO (Botones)
+   ACCIONES DEL PASO
    ============================================ */
 
 .stepActions {
@@ -378,7 +376,6 @@
   transform: scale(0.96);
 }
 
-/* Botón Anterior */
 .prevButton {
   background: var(--bg-card);
   color: var(--text-primary);
@@ -390,16 +387,15 @@
   transform: translateY(-1px);
 }
 
-/* Botón Siguiente / Empezar */
 .nextButton {
-  background: var(--accent-primary); /* #7c3aed */
+  background: var(--accent-primary);
   color: white;
   border: 1px solid var(--accent-primary);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2); /* Sombra morada */
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
 }
 
 .nextButton:hover {
-  background: #6d28d9; /* Tu hover de buttonPrimary */
+  background: #6d28d9;
   border-color: #6d28d9;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
@@ -409,7 +405,6 @@
   transform: translateY(0) scale(0.96);
 }
 
-/* Efecto de onda en el botón principal */
 .nextButton::after {
   content: '';
   position: absolute;
@@ -428,7 +423,6 @@
   height: 300px;
 }
 
-/* Botón Saltar (al pie) */
 .skipButtonStep {
   background: none;
   border: none;
@@ -473,7 +467,6 @@
   color: var(--accent-primary);
 }
 
-/* Badge de paso actual */
 .stepBadge {
   display: inline-block;
   background: var(--bg-card);
@@ -489,7 +482,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
+   ✅ RESPONSIVE - MÓVIL (MÁS PEQUEÑO)
    ============================================ */
 
 /* Tablets y móviles grandes */
@@ -497,25 +490,8 @@
   .onboardingCard {
     min-width: unset;
     max-width: 92vw;
-    padding: 24px;
-    margin: 0 16px;
-  }
-
-  .stepTitle {
-    font-size: 22px;
-  }
-
-  .stepDescription {
-    font-size: 14px;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 640px) {
-  .onboardingCard {
     padding: 20px;
-    max-width: 94vw;
-    margin: 0 12px;
+    margin: 0 16px;
     border-radius: 12px;
   }
 
@@ -525,20 +501,79 @@
 
   .stepDescription {
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.5;
+  }
+  
+  .stepContent {
+    gap: 12px;
+  }
+  
+  .progressContainer {
+    margin-bottom: 14px;
+  }
+}
+
+/* ✅ Móviles pequeños - MÁS COMPACTO */
+@media (max-width: 640px) {
+  .onboardingCard {
+    padding: 14px; /* Reducido de 20px a 14px */
+    max-width: 94vw;
+    margin: 0 10px;
+    border-radius: 10px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .stepBadge {
+    font-size: 9px;
+    padding: 1px 8px;
+    margin-bottom: 2px;
+  }
+
+  .stepTitle {
+    font-size: 17px; /* Reducido de 20px a 17px */
+    line-height: 1.2;
+  }
+
+  .stepDescription {
+    font-size: 13px; /* Reducido de 14px a 13px */
+    line-height: 1.5;
+  }
+
+  .stepContent {
+    gap: 8px; /* Reducido de 12px a 8px */
+  }
+
+  .progressContainer {
+    margin-bottom: 10px; /* Reducido */
+  }
+
+  .progressBar {
+    height: 3px;
+    margin-bottom: 4px;
+  }
+
+  .progressInfo {
+    font-size: 11px;
+  }
+
+  .skipButton {
+    font-size: 11px;
+    padding: 2px 8px;
   }
 
   .navigationButtons {
     flex-direction: column-reverse;
-    gap: 8px;
+    gap: 6px;
   }
 
   .button {
     width: 100%;
-    padding: 12px 20px;
+    padding: 10px 16px;
     min-width: unset;
-    font-size: 14px;
-    min-height: 48px;
+    font-size: 13px;
+    min-height: 40px; /* Reducido de 48px a 40px */
+    border-radius: 6px;
   }
 
   .prevButton {
@@ -550,40 +585,115 @@
   }
 
   .skipButtonStep {
-    padding: 6px;
-    font-size: 12px;
+    font-size: 11px;
+    padding: 4px;
   }
 
-  .progressInfo {
-    font-size: 12px;
+  .stepActions {
+    gap: 6px;
+    margin-top: 4px;
   }
 
-  .skipButton {
-    font-size: 12px;
-    padding: 2px 10px;
+  .stepImage {
+    margin: 2px 0 4px 0;
+    border-radius: 6px;
   }
 }
 
-/* Móviles muy pequeños */
+/* ✅ Móviles muy pequeños (menos de 380px) */
 @media (max-width: 380px) {
   .onboardingCard {
-    padding: 16px;
+    padding: 12px; /* Mínimo padding */
     max-width: 96vw;
-    margin: 0 8px;
+    margin: 0 6px;
+    border-radius: 8px;
+    max-height: 80vh;
   }
 
   .stepTitle {
-    font-size: 18px;
+    font-size: 15px;
   }
 
   .stepDescription {
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   .button {
-    padding: 10px 16px;
-    font-size: 13px;
-    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .stepContent {
+    gap: 6px;
+  }
+
+  .progressContainer {
+    margin-bottom: 6px;
+  }
+
+  .skipButtonStep {
+    font-size: 10px;
+  }
+
+  .stepBadge {
+    display: none; /* Ocultar badge en pantallas muy pequeñas */
+  }
+}
+
+/* ✅ Orientación horizontal en móvil */
+@media (max-height: 600px) and (orientation: landscape) {
+  .onboardingCard {
+    max-height: 90vh;
+    padding: 10px 14px;
+    border-radius: 8px;
+  }
+
+  .stepTitle {
+    font-size: 16px;
+  }
+
+  .stepDescription {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .stepBadge {
+    display: none;
+  }
+
+  .progressContainer {
+    margin-bottom: 6px;
+  }
+
+  .progressBar {
+    height: 2px;
+    margin-bottom: 3px;
+  }
+
+  .button {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 32px;
+    min-width: 60px;
+  }
+
+  .stepContent {
+    gap: 4px;
+  }
+
+  .navigationButtons {
+    flex-direction: row;
+  }
+
+  .skipButtonStep {
+    padding: 2px;
+    font-size: 10px;
+  }
+
+  .stepImage {
+    display: none;
   }
 }
 
@@ -591,7 +701,6 @@
    ANIMACIONES ADICIONALES
    ============================================ */
 
-/* Animación de entrada para el highlight */
 .highlight {
   animation: highlight-appear 0.5s cubic-bezier(0.4, 0, 0.2, 1),
              highlight-pulse 2s ease-in-out infinite 0.5s;
@@ -608,7 +717,6 @@
   }
 }
 
-/* Efecto de partículas (opcional, para pasos especiales) */
 .sparkle {
   position: absolute;
   pointer-events: none;
@@ -634,7 +742,6 @@
    ACCESIBILIDAD
    ============================================ */
 
-/* Focus visible para navegación por teclado */
 .button:focus-visible,
 .skipButton:focus-visible,
 .skipButtonStep:focus-visible {
@@ -642,7 +749,6 @@
   outline-offset: 2px;
 }
 
-/* Reducción de movimiento */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -653,7 +759,6 @@
   }
 }
 
-/* Alto contraste para textos */
 @media (prefers-contrast: high) {
   .stepDescription {
     color: var(--text-primary);
@@ -672,7 +777,6 @@
    MODO OSCURO / CLARO (opcional)
    ============================================ */
 
-/* Si tu app soporta tema claro */
 @media (prefers-color-scheme: light) {
   :root {
     --bg-primary: #f3f4f6;

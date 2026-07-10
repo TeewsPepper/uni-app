@@ -34,7 +34,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: 'calendar',
     title: '📅 Calendario Interactivo',
-    description: 'Haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
+    description: 'Despliega el calendario y haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
     target: 'calendario-container',
     position: 'bottom'
   },
@@ -43,7 +43,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '➕ ¡Empieza Ahora!',
     description: 'Crea tu primera materia y comienza a organizar tu vida universitaria. ¡Es más fácil de lo que piensas!',
     target: 'add-materia-button',
-    position: 'top'
+    position: 'left'
   },
   {
     id: 'complete',
