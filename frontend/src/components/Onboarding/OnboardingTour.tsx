@@ -1,24 +1,32 @@
 // frontend/src/components/Onboarding/OnboardingTour.tsx
 import React, { useEffect } from 'react';
-import { useOnboarding } from '../../hooks/useOnboarding';
 import { OnboardingOverlay } from './OnboardingOverlay';
 import { OnboardingStep } from './OnboardingStep';
 import { OnboardingProgress } from './OnboardingProgress';
+import { useOnboarding } from '../../hooks/useOnboarding';
 import styles from './Onboarding.module.css';
 
-export const OnboardingTour: React.FC = () => {
+interface OnboardingTourProps {
+  userId: string;
+  onComplete: () => void;
+  onSkip: () => void;
+}
+
+export const OnboardingTour: React.FC<OnboardingTourProps> = ({
+  userId,
+  onComplete,
+  onSkip
+}) => {
   const {
     currentStep,
     isActive,
-    isLoading,
     totalSteps,
     currentStepData,
     nextStep,
     prevStep,
     skipOnboarding
-  } = useOnboarding();
+  } = useOnboarding({ userId, onComplete, onSkip });
 
-  // Prevenir scroll cuando el onboarding está activo
   useEffect(() => {
     if (isActive) {
       document.body.style.overflow = 'hidden';
@@ -37,7 +45,8 @@ export const OnboardingTour: React.FC = () => {
     };
   }, [isActive]);
 
-  if (isLoading || !isActive) {
+  // ✅ Ya no necesitamos isLoading
+  if (!isActive) {
     return null;
   }
 

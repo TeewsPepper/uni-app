@@ -51,6 +51,11 @@ function App() {
   const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  
+  // ✅ NUEVO: Estado para controlar el onboarding
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string>("");
+  
   const [materiaEditando, setMateriaEditando] = useState<Materia | null>(null);
   const [mostrarModalDia, setMostrarModalDia] = useState<boolean>(false);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<string>("");
@@ -81,6 +86,17 @@ function App() {
     recargar,
   } = useExamenes();
 
+  // ✅ Función para verificar onboarding
+  const checkOnboarding = useCallback((userData: { id: string; email: string }) => {
+    try {
+      const ONBOARDING_KEY = 'onboarding_completed_v1';
+      const completed = localStorage.getItem(`${ONBOARDING_KEY}_${userData.id}`);
+      return !completed;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // ✨ Verificar autenticación al cargar
   useEffect(() => {
     const verificarAuth = async (): Promise<void> => {
@@ -99,8 +115,14 @@ function App() {
         if (data.user) {
           setIsAuthenticated(true);
           setUserEmail(data.user.email);
+          setUserId(data.user.id);
+          
           // ✅ Cargar datos después de autenticar
           await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
+          
+          // ✅ Verificar onboarding después de cargar datos
+          const shouldShow = checkOnboarding(data.user);
+          setShowOnboarding(shouldShow);
         } else {
           setIsAuthenticated(false);
         }
@@ -113,7 +135,7 @@ function App() {
     };
 
     verificarAuth();
-  }, [cargarMaterias, cargarTareas, recargar]);
+  }, [cargarMaterias, cargarTareas, recargar, checkOnboarding]);
 
   const handleLogout = useCallback(async (): Promise<void> => {
     try {
@@ -124,8 +146,23 @@ function App() {
     } finally {
       setIsAuthenticated(false);
       setUserEmail("");
+      setUserId("");
+      setShowOnboarding(false);
     }
   }, []);
+
+  // ✅ Manejar completado del onboarding
+  const handleOnboardingComplete = useCallback(() => {
+    if (userId) {
+      try {
+        const ONBOARDING_KEY = 'onboarding_completed_v1';
+        localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
+      } catch (error) {
+        console.error('Error saving onboarding status:', error);
+      }
+    }
+    setShowOnboarding(false);
+  }, [userId]);
 
   const handleAgregarTarea = useCallback(
     async (materiaId: string, titulo: string, fecha: string): Promise<void> => {
@@ -278,12 +315,18 @@ function App() {
       if (data.user) {
         setIsAuthenticated(true);
         setUserEmail(data.user.email);
+        setUserId(data.user.id);
+        
         await Promise.all([cargarMaterias(), cargarTareas(), recargar()]);
+        
+        // ✅ Verificar onboarding después del login
+        const shouldShow = checkOnboarding(data.user);
+        setShowOnboarding(shouldShow);
       }
     } catch (err: unknown) {
       setError(getErrorMessage(err));
     }
-  }, [cargarMaterias, cargarTareas, recargar]);
+  }, [cargarMaterias, cargarTareas, recargar, checkOnboarding]);
 
   if (loadingAuth) return <div className={styles.loading}>Cargando...</div>;
 
@@ -329,7 +372,6 @@ function App() {
           <h2 className={styles.sectionTitle}>
             <BookOpen size={20} /> Mis Materias
           </h2>
-          {/* ✅ MateriaForm ya tiene id="add-materia-button" */}
           <MateriaForm onAgregar={agregarMateria} />
         </div>
         <div className={styles.materiaGrid}>
@@ -407,8 +449,14 @@ function App() {
         </div>
       )}
 
-      {/* 🔹 5. OnboardingTour - SIEMPRE al final */}
-      <OnboardingTour />
+      {/* 🔹 5. OnboardingTour - Controlado por estado */}
+      {showOnboarding && userId && (
+        <OnboardingTour 
+          userId={userId}
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingComplete}
+        />
+      )}
     </div>
   );
 }
