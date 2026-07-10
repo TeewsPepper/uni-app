@@ -36,7 +36,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '📅 Calendario Interactivo',
     description: 'Despliega el calendario y haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
     target: 'calendario-container',
-    position: 'bottom'
+    position: 'top'
   },
   {
     id: 'add-materia',
