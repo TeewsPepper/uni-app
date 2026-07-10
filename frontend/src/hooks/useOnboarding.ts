@@ -29,21 +29,21 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: '📋 Próximos Eventos',
     description: 'Tus tareas y exámenes más cercanos aparecerán aquí. ¡No olvides ninguna fecha importante!',
     target: 'proximos-eventos',
-    position: 'bottom'
+    position: 'right'
   },
   {
     id: 'calendar',
     title: '📅 Calendario Interactivo',
     description: 'Haz clic en cualquier día para ver o agregar eventos. Visualiza tu mes de un vistazo.',
     target: 'calendario-container',
-    position: 'bottom'
+    position: 'top'
   },
   {
     id: 'add-materia',
     title: '➕ ¡Empieza Ahora!',
     description: 'Crea tu primera materia y comienza a organizar tu vida universitaria. ¡Es más fácil de lo que piensas!',
     target: 'add-materia-button',
-    position: 'top'
+    position: 'center'
   },
   {
     id: 'complete',
