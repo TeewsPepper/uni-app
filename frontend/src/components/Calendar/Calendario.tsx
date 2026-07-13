@@ -61,7 +61,7 @@ export const Calendario = ({ tareas, examenes, materias, onFechaClick }: Props) 
       };
     });
 
-  // ✅ Eventos de exámenes - ya tienen su propio color o el de la materia
+  // ✅ Eventos de exámenes 
   const eventosExamenes: CalendarioEvento[] = examenes.map(examen => {
     // Obtener color de la materia si está poblada, o buscar por ID
     let color = '#ce9178'; // Color por defecto para exámenes
