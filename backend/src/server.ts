@@ -8,9 +8,10 @@ import cookieParser from 'cookie-parser';
 
 // Importar rutas
 import authRoutes from './routes/auth.js';
-import materiasRoutes from './routes/materias.js';  // ✅ AGREGAR
-import tareasRoutes from './routes/tareas.js';      // ✅ AGREGAR
-import examenesRoutes from './routes/examenes.js';  // ✅ AGREGAR
+import materiasRoutes from './routes/materias.js';
+import tareasRoutes from './routes/tareas.js';      
+import examenesRoutes from './routes/examenes.js';  
+import breakRoutes from './routes/break.js';
 
 // Configurar __dirname para ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -59,9 +60,10 @@ if (process.env.NODE_ENV === 'production') {
 
 // 🛣️ Rutas de la API
 app.use('/api/auth', authRoutes);
-app.use('/api/materias', materiasRoutes);   // ✅ AGREGAR
-app.use('/api/tareas', tareasRoutes);       // ✅ AGREGAR
-app.use('/api/examenes', examenesRoutes);   // ✅ AGREGAR
+app.use('/api/materias', materiasRoutes);   
+app.use('/api/tareas', tareasRoutes);       
+app.use('/api/examenes', examenesRoutes);  
+app.use('/api/break', breakRoutes);
 
 // Ejemplo de ruta de prueba
 app.get('/api/health', (req: Request, res: Response) => {

@@ -155,3 +155,54 @@ export interface CreateExamenData {
 export interface UpdateExamenData extends Partial<CreateExamenData> {
   id: string;
 }
+
+// ==================== BREAK ZONE TYPES ====================
+
+export type BreakActivityType = 'social' | 'cultural' | 'deportivo' | 'descanso';
+
+export interface BreakActivity {
+  _id: string;
+  titulo: string;
+  descripcion: string;
+  tipo: BreakActivityType;
+  creadorId: string;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  ubicacion: string;
+  maxParticipantes?: number;
+  participantes: string[];
+  temaRelacionado?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Propiedades enriquecidas (frontend)
+  esCreador: boolean;
+  estaParticipando: boolean;
+  cuposDisponibles?: number;
+}
+
+export interface CreateBreakActivityDTO {
+  titulo: string;
+  descripcion: string;
+  tipo: BreakActivityType;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  ubicacion: string;
+  maxParticipantes?: number;
+  temaRelacionado?: string;
+}
+
+export interface BreakFilters {
+  tipo?: BreakActivityType;
+  temaRelacionado?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}
+
+export const BREAK_TIPO_CONFIG: Record<BreakActivityType, { color: string; label: string; icon: string }> = {
+  social: { color: '#ec489a', label: 'Social', icon: '👥' },
+  cultural: { color: '#f59e0b', label: 'Cultural', icon: '🎭' },
+  deportivo: { color: '#3b82f6', label: 'Deportivo', icon: '⚽' },
+  descanso: { color: '#10b981', label: 'Descanso', icon: '😌' }
+};

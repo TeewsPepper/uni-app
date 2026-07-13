@@ -59,6 +59,73 @@
   align-self: flex-start;
 }
 
+/* ✅ NUEVOS ESTILOS PARA BREAK ZONE */
+.buttonsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.breakZoneButton {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #569cd6;
+  border-radius: 6px;
+  color: #569cd6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.breakZoneButton:hover {
+  background: #569cd6;
+  color: #1e1e1e;
+  border-color: #569cd6;
+}
+
+.breakZoneButton:active {
+  transform: scale(0.95);
+}
+
+.breakZoneButton.active {
+  background: #569cd6;
+  color: #1e1e1e;
+  border-color: #569cd6;
+}
+
+.logoutButton {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #f14c4c;
+  border-radius: 6px;
+  color: #f14c4c;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.logoutButton:hover {
+  background: #f14c4c;
+  color: #1e1e1e;
+  border-color: #f14c4c;
+}
+
+.logoutButton:active {
+  transform: scale(0.95);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header {
@@ -79,6 +146,16 @@
   
   .userInfo {
     padding: 6px 12px;
+  }
+  
+  .buttonsContainer {
+    gap: 8px;
+  }
+  
+  .breakZoneButton,
+  .logoutButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
 
@@ -107,5 +184,18 @@
   .userSection button {
     padding: 5px 10px;
     font-size: 11px;
+  }
+  
+  .buttonsContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  
+  .breakZoneButton,
+  .logoutButton {
+    padding: 5px 10px;
+    font-size: 11px;
+    justify-content: center;
   }
 }
