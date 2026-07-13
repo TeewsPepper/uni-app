@@ -5,7 +5,7 @@ export interface IHorario {
   dia: string;
   horaInicio: string;
   horaFin: string;
-  aula: string;  // ✅ Ahora es obligatorio
+  aula: string;  
 }
 
 // Interface para el documento de Materia
@@ -24,7 +24,7 @@ const horarioSchema = new Schema<IHorario>({
   dia: { type: String, required: true },
   horaInicio: { type: String, required: true },
   horaFin: { type: String, required: true },
-  aula: { type: String, required: true, default: '' }  // ✅ Ahora es obligatorio con default
+  aula: { type: String, default: '' }  
 }, { _id: false });
 
 // Schema principal de Materia
